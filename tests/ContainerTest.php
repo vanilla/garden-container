@@ -9,7 +9,7 @@ namespace Garden\Container\Tests;
 
 use Garden\Container\Callback;
 use Garden\Container\Container;
-use Garden\Container\NotFoundException;
+use Garden\Container\DefaultReference;
 use Garden\Container\Reference;
 use Garden\Container\Tests\Fixtures\Db;
 use Garden\Container\Tests\Fixtures\Sql;
@@ -194,8 +194,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase {
             ->rule(self::FOO_AWARE)
             ->addCall('setFoo', [123])
             ->defaultRule()
-            ->addCall('setBar', [456])
-        ;
+            ->addCall('setBar', [456]);
 
         $foo = $c->get(self::FOO);
         $this->assertSame(123, $foo->foo);

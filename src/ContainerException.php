@@ -8,6 +8,9 @@
 namespace Garden\Container;
 
 
+/**
+ * Represents the base exception for all {@link Container} exceptions.
+ */
 class ContainerException extends \Exception implements \Interop\Container\Exception\ContainerException {
 
 }
