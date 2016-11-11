@@ -23,7 +23,7 @@ class Container implements ContainerInterface {
      */
     public function __construct() {
         $this->rules = ['*' => ['inherit' => true, 'constructorArgs' => []]];
-        $this->currentRule =& $this->rules['*'];
+        $this->currentRule = &$this->rules['*'];
         $this->instances = [];
         $this->factories = [];
     }
@@ -44,7 +44,7 @@ class Container implements ContainerInterface {
      * @return $this
      */
     public function defaultRule() {
-        $this->currentRule =& $this->rules['*'];
+        $this->currentRule = &$this->rules['*'];
         return $this;
     }
 
@@ -60,7 +60,7 @@ class Container implements ContainerInterface {
         if (!isset($this->rules[$id])) {
             $this->rules[$id] = [];
         }
-        $this->currentRule =& $this->rules[$id];
+        $this->currentRule = &$this->rules[$id];
         return $this;
     }
 

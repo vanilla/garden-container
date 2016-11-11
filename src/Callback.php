@@ -18,8 +18,8 @@ class Callback implements ReferenceInterface {
         $this->callback = $callback;
     }
 
-    function resolve(Container $container, $instance = null) {
-        $this->callback($container, $instance);
+    public function resolve(Container $container, $instance = null) {
+        return call_user_func($this->callback, $container, $instance);
     }
 
     /**

@@ -7,11 +7,13 @@
 
 namespace Garden\Container\Tests;
 
+use Garden\Container\Callback;
 use Garden\Container\Container;
 use Garden\Container\NotFoundException;
 use Garden\Container\Reference;
 use Garden\Container\Tests\Fixtures\Db;
 use Garden\Container\Tests\Fixtures\Sql;
+use Garden\Container\Tests\Fixtures\Tuple;
 
 class ContainerTest extends \PHPUnit_Framework_TestCase {
     const DB = 'Garden\Container\Tests\Fixtures\Db';
@@ -249,6 +251,23 @@ class ContainerTest extends \PHPUnit_Framework_TestCase {
 
         $c->call([$sql, 'setDb']);
         $this->assertInstanceOf(self::DB, $sql->db);
+    }
+
+    public function testCallback() {
+        $c = new Container();
+
+        $i = 1;
+        $cb = new Callback(function () use (&$i) {
+            return $i++;
+        });
+
+        /**
+         * @var Tuple $tuple
+         */
+        $tuple = $c->getArgs(self::TUPLE, [$cb, $cb]);
+
+        $this->assertSame(1, $tuple->a);
+        $this->assertSame(2, $tuple->b);
     }
 
     /**
