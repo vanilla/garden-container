@@ -7,17 +7,27 @@
 
 namespace Garden\Container;
 
-
+/**
+ * A reference that uses a callback to resolve.
+ */
 class Callback implements ReferenceInterface {
     /**
      * @var callable $callback
      */
     private $callback;
 
+    /**
+     * Construct a new instance of the {@link Callback} class.
+     *
+     * @param callable $callback The callback of the reference.
+     */
     public function __construct(callable $callback) {
         $this->callback = $callback;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function resolve(Container $container, $instance = null) {
         return call_user_func($this->callback, $container, $instance);
     }

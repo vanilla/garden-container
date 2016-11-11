@@ -7,10 +7,12 @@
 
 namespace Garden\Container;
 
-
+/**
+ * Used internally.
+ */
 class DefaultReference implements ReferenceInterface {
     /**
-     * @var array
+     * @var string
      */
     private $name;
 
@@ -23,17 +25,27 @@ class DefaultReference implements ReferenceInterface {
         $this->setName($name);
     }
 
+    /**
+     * Get the name of the reference.
+     *
+     * @return string Returns the name of the reference.
+     */
     public function getName() {
         return $this->name;
     }
 
     /**
-     * @param string $name
+     * Set the name of the reference.
+     *
+     * @param string $name The name of the reference.
      */
     public function setName($name) {
         $this->name = $name;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function resolve(Container $container, $_ = null) {
         return $container->get($this->name);
     }

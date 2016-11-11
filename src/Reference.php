@@ -7,7 +7,9 @@
 
 namespace Garden\Container;
 
-
+/**
+ * A reference to another entry in a {@link Container}.
+ */
 class Reference implements ReferenceInterface {
     /**
      * @var array
@@ -41,6 +43,9 @@ class Reference implements ReferenceInterface {
         $this->name = $name;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function resolve(Container $container, $_ = null) {
         if (empty($this->name)) {
             return null;
