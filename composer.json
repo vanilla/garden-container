@@ -1,0 +1,25 @@
+{
+	"name": "vanilla/garden-container",
+	"description": "A dependency injection container.",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Todd Burry",
+			"email": "todd@vanillaforums.com"
+		}
+	],
+	"require": {
+		"php": ">=5.4.0",
+		"container-interop/container-interop": "^1.1"
+	},
+	"autoload": {
+		"psr-4": {
+			"Garden\\Container\\": "src"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Garden\\Container\\Tests\\": "tests"
+		}
+	}
+}
