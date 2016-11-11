@@ -23,10 +23,20 @@ class Reference implements ReferenceInterface {
         $this->setName($name);
     }
 
+    /**
+     * Get the name of the reference.
+     *
+     * @return string|array Returns the name of the reference.
+     */
     public function getName() {
         return $this->name;
     }
 
+    /**
+     * Set the name of the reference.
+     *
+     * @param string|array $name The name of the reference.
+     */
     public function setName($name) {
         $this->name = $name;
     }
