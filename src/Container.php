@@ -191,7 +191,7 @@ class Container implements ContainerInterface {
             $interfaces = class_implements($nid);
             foreach ($interfaces as $interface) {
                 if (!empty($this->rules[$interface]['calls'])
-                    && (!isset($this->rules[$interface]['inherit'])|| $this->rules[$interface]['inherit'] !== false)) {
+                    && (!isset($this->rules[$interface]['inherit']) || $this->rules[$interface]['inherit'] !== false)) {
 
                     $rule['calls'] = array_merge(
                         isset($rule['calls']) ? $rule['calls'] : [],
@@ -212,7 +212,7 @@ class Container implements ContainerInterface {
      *
      * @param string $nid The normalized ID of the container item.
      * @param array $rule The resolved rule for the ID.
-     * @return callable Returns a function that when called will create a new instance of the class.
+     * @return \Closure Returns a function that when called will create a new instance of the class.
      * @throws NotFoundException No entry was found for this identifier.
      */
     private function makeFactory($nid, array $rule) {
@@ -226,11 +226,11 @@ class Container implements ContainerInterface {
         if ($constructor && $constructor->getNumberOfParameters() > 0) {
             $constructorArgs = $this->makeDefaultArgs($constructor, $rule['constructorArgs'], $rule);
 
-            $factory = function ($args) use ($class, $constructorArgs) {
+            $factory = function($args) use ($class, $constructorArgs) {
                 return $class->newInstanceArgs($this->resolveArgs($constructorArgs, $args));
             };
         } else {
-            $factory = function () use ($className) {
+            $factory = function() use ($className) {
                 return new $className;
             };
         }
@@ -247,7 +247,7 @@ class Container implements ContainerInterface {
             }
 
             // Wrap the factory in one that makes the calls.
-            $factory = function ($args) use ($factory, $calls) {
+            $factory = function($args) use ($factory, $calls) {
                 $instance = $factory($args);
 
                 foreach ($calls as $call) {
