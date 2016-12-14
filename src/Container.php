@@ -392,7 +392,7 @@ class Container implements ContainerInterface {
 
             if (array_key_exists($name, $ruleArgs)) {
                 $value = $ruleArgs[$name];
-            } elseif ($param->getClass()) {
+            } elseif ($param->getClass() && !(isset($ruleArgs[$pos]) && is_object($ruleArgs[$pos]) && get_class($ruleArgs[$pos]) === $param->getClass()->getName())) {
                 $value = new DefaultReference($this->normalizeID($param->getClass()->getName()));
             } elseif (array_key_exists($pos, $ruleArgs)) {
                 $value = $ruleArgs[$pos];
