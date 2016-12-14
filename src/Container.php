@@ -65,6 +65,15 @@ class Container implements ContainerInterface {
     }
 
     /**
+     * Get the class name of the current rule.
+     *
+     * @return string Returns a class name.
+     */
+    public function getClass() {
+        return empty($this->currentRule['class']) ? '' : $this->currentRule['class'];
+    }
+
+    /**
      * Set the name of the class for the current rule.
      *
      * @param string $value A valid class name.
@@ -73,6 +82,15 @@ class Container implements ContainerInterface {
     public function setClass($value) {
         $this->currentRule['class'] = $value;
         return $this;
+    }
+
+    /**
+     * Get the factory callback for the current rule.
+     *
+     * @return callable|null Returns the rule's factory or **null** if it has none.
+     */
+    public function getFactory() {
+        return isset($this->currentRule['factory']) ? $this->currentRule['factory'] : null;
     }
 
     /**
@@ -87,6 +105,15 @@ class Container implements ContainerInterface {
     }
 
     /**
+     * Whether or not the current rule is shared.
+     *
+     * @return bool Returns **true** if the rule is shared or **false** otherwise.
+     */
+    public function isShared() {
+        return !empty($this->currentRule['shared']);
+    }
+
+    /**
      * Set whether or not the current rule is shared.
      *
      * @param bool $value Whether or not the current rule is shared.
@@ -98,6 +125,15 @@ class Container implements ContainerInterface {
     }
 
     /**
+     * Whether or not the current rule will inherit to subclasses.
+     *
+     * @return bool Returns **true** if the current rule inherits or **false** otherwise.
+     */
+    public function getInherit() {
+        return !empty($this->currentRule['inherit']);
+    }
+
+    /**
      * Set whether or not the current rule extends to subclasses.
      *
      * @param bool $value Pass **true** to have subclasses inherit this rule or **false** otherwise.
@@ -106,6 +142,15 @@ class Container implements ContainerInterface {
     public function setInherit($value) {
         $this->currentRule['inherit'] = $value;
         return $this;
+    }
+
+    /**
+     * Get the constructor arguments for the current rule.
+     *
+     * @return array Returns the constructor arguments for the current rule.
+     */
+    public function getConstructorArgs() {
+        return empty($this->currentRule['constructorArgs']) ? [] : $this->currentRule['constructorArgs'];
     }
 
     /**
