@@ -261,4 +261,24 @@ class ContainerTest extends TestBase {
         $this->assertSame(1, $tuple->a);
         $this->assertSame(2, $tuple->b);
     }
+
+    /**
+     * When setting an object constructor argument it should override a dependency injection.
+     *
+     * @param bool $shared Whether or not the container is shared.
+     * @dataProvider provideShared
+     */
+    public function testConstructorArgsOverridingInjection($shared) {
+        $dic = new Container();
+
+        $db = new Db();
+
+        $dic->rule(self::SQL)
+            ->setShared(true)
+            ->setConstructorArgs([$db]);
+
+        /* @var Sql $sql */
+        $sql = $dic->get(self::SQL);
+        $this->assertSame($db, $sql->db);
+    }
 }
