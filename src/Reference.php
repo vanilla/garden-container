@@ -12,7 +12,7 @@ namespace Garden\Container;
  */
 class Reference implements ReferenceInterface {
     /**
-     * @var array
+     * @var string|array
      */
     private $name;
 
