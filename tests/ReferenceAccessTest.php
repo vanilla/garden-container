@@ -12,7 +12,7 @@ use Garden\Container\Container;
 use Garden\Container\DefaultReference;
 use Garden\Container\Reference;
 
-class ReferenceAccessTest extends \PHPUnit_Framework_TestCase  {
+class ReferenceAccessTest extends TestBase {
 
     public function testCallbackAccess() {
         $f = function () {

@@ -15,14 +15,7 @@ use Garden\Container\Tests\Fixtures\Db;
 use Garden\Container\Tests\Fixtures\Sql;
 use Garden\Container\Tests\Fixtures\Tuple;
 
-class ContainerTest extends \PHPUnit_Framework_TestCase {
-    const DB = 'Garden\Container\Tests\Fixtures\Db';
-    const FOO = 'Garden\Container\Tests\Fixtures\Foo';
-    const FOO_AWARE = 'Garden\Container\Tests\Fixtures\FooAwareInterface';
-    const PDODB = 'Garden\Container\Tests\Fixtures\PdoDb';
-    const SQL = 'Garden\Container\Tests\Fixtures\Sql';
-    const TUPLE = 'Garden\Container\Tests\Fixtures\Tuple';
-
+class ContainerTest extends TestBase {
     public function testBasicConstruction() {
         $c = new Container();
         $db = $c->get(self::DB);
@@ -267,17 +260,5 @@ class ContainerTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertSame(1, $tuple->a);
         $this->assertSame(2, $tuple->b);
-    }
-
-    /**
-     * Provide values for tests that are configured for shared and non shared.
-     *
-     * @return array Returns a data provider array.
-     */
-    public function provideShared() {
-        return [
-            'notShared' => [false],
-            'shared' => [true]
-        ];
     }
 }
