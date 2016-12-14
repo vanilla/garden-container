@@ -15,11 +15,15 @@ class Foo implements FooAwareInterface {
     // Do not add a constructor.
 
 
-    function setFoo($foo) {
+    public function setFoo($foo) {
         $this->foo = $foo;
     }
 
-    function setBar($bar) {
+    public function setBar($bar) {
         $this->bar = $bar;
+    }
+
+    public static function create() {
+        return new Foo();
     }
 }
