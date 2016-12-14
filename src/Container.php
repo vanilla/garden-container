@@ -76,6 +76,17 @@ class Container implements ContainerInterface {
     }
 
     /**
+     * Set the factory that will be used to create the instance for the current rule.
+     *
+     * @param callable $value This callback will be called to create the instance for the rule.
+     * @return $this
+     */
+    public function setFactory(callable $value) {
+        $this->currentRule['factory'] = $value;
+        return $this;
+    }
+
+    /**
      * Set whether or not the current rule is shared.
      *
      * @param bool $value Whether or not the current rule is shared.
@@ -150,12 +161,13 @@ class Container implements ContainerInterface {
     public function getArgs($id, array $args = []) {
         $id = $this->normalizeID($id);
 
-        // A shared instance just gets returned.
         if (isset($this->instances[$id])) {
+            // A shared instance just gets returned.
             return $this->instances[$id];
         }
 
         if (isset($this->factories[$id])) {
+            // The factory for this object type is already there so call it to create the instance.
             return $this->factories[$id]($args);
         }
 
@@ -191,7 +203,8 @@ class Container implements ContainerInterface {
             $interfaces = class_implements($nid);
             foreach ($interfaces as $interface) {
                 if (!empty($this->rules[$interface]['calls'])
-                    && (!isset($this->rules[$interface]['inherit']) || $this->rules[$interface]['inherit'] !== false)) {
+                    && (!isset($this->rules[$interface]['inherit']) || $this->rules[$interface]['inherit'] !== false)
+                ) {
 
                     $rule['calls'] = array_merge(
                         isset($rule['calls']) ? $rule['calls'] : [],
@@ -217,26 +230,48 @@ class Container implements ContainerInterface {
      */
     private function makeFactory($nid, array $rule) {
         $className = empty($rule['class']) ? $nid : $rule['class'];
-        if (!class_exists($className)) {
-            throw new NotFoundException("Class $className does not exist.", 404);
-        }
-        $class = new \ReflectionClass($className);
-        $constructor = $class->getConstructor();
 
-        if ($constructor && $constructor->getNumberOfParameters() > 0) {
-            $constructorArgs = $this->makeDefaultArgs($constructor, $rule['constructorArgs'], $rule);
+        if (!empty($rule['factory'])) {
+            // The instance is created with a user-supplied factory function.
+            $callback = $rule['factory'];
+            $function = $this->reflectCallback($callback);
 
-            $factory = function($args) use ($class, $constructorArgs) {
-                return $class->newInstanceArgs($this->resolveArgs($constructorArgs, $args));
-            };
+            if ($function->getNumberOfParameters() > 0) {
+                $callbackArgs = $this->makeDefaultArgs($function, $rule['constructorArgs'], $rule);
+                $factory = function ($args) use ($callback, $callbackArgs) {
+                    return call_user_func_array($callback, $this->resolveArgs($callbackArgs, $args));
+                };
+            } else {
+                $factory = $callback;
+            }
+
+            // If a class is specified then still reflect on it so that calls can be made against it.
+            if (class_exists($className)) {
+                $class = new \ReflectionClass($className);
+            }
         } else {
-            $factory = function() use ($className) {
-                return new $className;
-            };
+            // The instance is created by newing up a class.
+            if (!class_exists($className)) {
+                throw new NotFoundException("Class $className does not exist.", 404);
+            }
+            $class = new \ReflectionClass($className);
+            $constructor = $class->getConstructor();
+
+            if ($constructor && $constructor->getNumberOfParameters() > 0) {
+                $constructorArgs = $this->makeDefaultArgs($constructor, $rule['constructorArgs'], $rule);
+
+                $factory = function ($args) use ($class, $constructorArgs) {
+                    return $class->newInstanceArgs($this->resolveArgs($constructorArgs, $args));
+                };
+            } else {
+                $factory = function () use ($className) {
+                    return new $className;
+                };
+            }
         }
 
         // Add calls to the factory.
-        if (!empty($rule['calls'])) {
+        if (isset($class) && !empty($rule['calls'])) {
             $calls = [];
 
             // Generate the calls array.
@@ -247,7 +282,7 @@ class Container implements ContainerInterface {
             }
 
             // Wrap the factory in one that makes the calls.
-            $factory = function($args) use ($factory, $calls) {
+            $factory = function ($args) use ($factory, $calls) {
                 $instance = $factory($args);
 
                 foreach ($calls as $call) {
@@ -277,27 +312,51 @@ class Container implements ContainerInterface {
      */
     private function createSharedInstance($nid, array $rule, array $args) {
         $className = empty($rule['class']) ? $nid : $rule['class'];
-        if (!class_exists($className)) {
-            throw new NotFoundException("Class $className does not exist.", 404);
-        }
-        $class = new \ReflectionClass($className);
-        $constructor = $class->getConstructor();
 
-        if ($constructor && $constructor->getNumberOfParameters() > 0) {
-            $constructorArgs = $this->resolveArgs(
-                $this->makeDefaultArgs($constructor, $rule['constructorArgs'], $rule),
-                $args
-            );
+        if (!empty($rule['factory'])) {
+            // The instance is created with a user-supplied factory function.
+            $callback = $rule['factory'];
+            $function = $this->reflectCallback($callback);
 
-            // Instantiate the object first so that this instance can be used for cyclic dependencies.
-            $this->instances[$nid] = $instance = $class->newInstanceWithoutConstructor();
-            $constructor->invokeArgs($instance, $constructorArgs);
+            if ($function->getNumberOfParameters() > 0) {
+                $callbackArgs = $this->resolveArgs(
+                    $this->makeDefaultArgs($function, $rule['constructorArgs'], $rule),
+                    $args
+                );
+
+                $this->instances[$nid] = null; // prevent cyclic dependency from infinite loop.
+                $this->instances[$nid] = $instance = call_user_func_array($callback, $callbackArgs);
+            } else {
+                $this->instances[$nid] = $instance = $callback();
+            }
+
+            // If a class is specified then still reflect on it so that calls can be made against it.
+            if (class_exists($className)) {
+                $class = new \ReflectionClass($className);
+            }
         } else {
-            $this->instances[$nid] = $instance = new $class->name;
+            if (!class_exists($className)) {
+                throw new NotFoundException("Class $className does not exist.", 404);
+            }
+            $class = new \ReflectionClass($className);
+            $constructor = $class->getConstructor();
+
+            if ($constructor && $constructor->getNumberOfParameters() > 0) {
+                $constructorArgs = $this->resolveArgs(
+                    $this->makeDefaultArgs($constructor, $rule['constructorArgs'], $rule),
+                    $args
+                );
+
+                // Instantiate the object first so that this instance can be used for cyclic dependencies.
+                $this->instances[$nid] = $instance = $class->newInstanceWithoutConstructor();
+                $constructor->invokeArgs($instance, $constructorArgs);
+            } else {
+                $this->instances[$nid] = $instance = new $class->name;
+            }
         }
 
         // Call subsequent calls on the new object.
-        if (!empty($rule['calls'])) {
+        if (isset($class) && !empty($rule['calls'])) {
             foreach ($rule['calls'] as $call) {
                 list($methodName, $args) = $call;
                 $method = $class->getMethod($methodName);
@@ -459,5 +518,19 @@ class Container implements ContainerInterface {
      */
     public function get($id) {
         return $this->getArgs($id);
+    }
+
+    /**
+     * Determine the reflection information for a callback.
+     *
+     * @param callable $callback The callback to reflect.
+     * @return \ReflectionFunctionAbstract Returns the reflection function for the callback.
+     */
+    private function reflectCallback(callable $callback) {
+        if (is_array($callback)) {
+            return new \ReflectionMethod($callback[0], $callback[1]);
+        } else {
+            return new \ReflectionFunction($callback);
+        }
     }
 }
