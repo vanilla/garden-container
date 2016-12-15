@@ -52,4 +52,48 @@ class RuleAccessTest extends TestBase {
         $c->setFactory($callback);
         $this->assertSame($callback, $c->getFactory());
     }
+
+    /**
+     * A new container should have the default (*) rule.
+     */
+    public function testHasDefaultRule() {
+        $c = new Container();
+
+        $this->assertTrue($c->hasRule('*'));
+    }
+
+    /**
+     * A defined rule should test for existence.
+     */
+    public function testHasRule() {
+        $c = new Container();
+
+        $this->assertFalse($c->hasRule('foo'));
+
+        $c->rule('foo')->setClass(self::DB);
+        $this->assertTrue($c->hasRule('foo'));
+    }
+
+    /**
+     * A newly defined rule should not test as true.
+     */
+    public function testNotHasNewSelectedRule() {
+        $c = new Container();
+
+        $this->assertFalse($c->hasRule('foo'));
+
+        $c->rule('foo');
+        $this->assertFalse($c->hasRule('foo'));
+    }
+
+    /**
+     * A subclass should not say it has a rule if its parent has a rule defined.
+     */
+    public function testSubclassHasRule() {
+        $c = new Container();
+
+        $c->rule(self::DB)->setClass(self::PDODB);
+
+        $this->assertFalse($c->hasRule(self::PDODB));
+    }
 }

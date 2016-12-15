@@ -552,6 +552,17 @@ class Container implements ContainerInterface {
     }
 
     /**
+     * Determines whether a rule has been defined at a given ID.
+     *
+     * @param string $id Identifier of the entry to look for.
+     * @return bool Returns **true** if a rule has been defined or **false** otherwise.
+     */
+    public function hasRule($id) {
+        $id = $this->normalizeID($id);
+        return !empty($this->rules[$id]);
+    }
+
+    /**
      * Finds an entry of the container by its identifier and returns it.
      *
      * @param string $id Identifier of the entry to look for.
