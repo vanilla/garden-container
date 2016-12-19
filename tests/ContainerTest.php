@@ -227,4 +227,32 @@ class ContainerTest extends TestBase {
         $this->assertSame(1, $tuple->a);
         $this->assertSame(2, $tuple->b);
     }
+
+    /**
+     * An rule alias should point to the same rule.
+     */
+    public function testAlias() {
+        $dic = new Container();
+
+        $dic->rule('foo')
+            ->setAliasOf(self::DB);
+
+        $db = $dic->get('foo');
+        $this->assertInstanceOf(self::DB, $db);
+    }
+
+    /**
+     * An alias to a shared rule should get an instance of the exact same object.
+     */
+    public function testSharedAlias() {
+        $dic = new Container();
+
+        $dic->rule(self::DB)
+            ->setShared(true)
+            ->addAlias('foo');
+
+        $db1 = $dic->get(self::DB);
+        $db2 = $dic->get('foo');
+        $this->assertSame($db1, $db2);
+    }
 }
