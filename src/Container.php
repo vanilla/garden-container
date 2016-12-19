@@ -44,8 +44,7 @@ class Container implements ContainerInterface {
      * @return $this
      */
     public function defaultRule() {
-        $this->currentRule = &$this->rules['*'];
-        return $this;
+        return $this->rule('*');
     }
 
     /**
@@ -76,11 +75,13 @@ class Container implements ContainerInterface {
     /**
      * Set the name of the class for the current rule.
      *
-     * @param string $value A valid class name.
+     * @param string $className A valid class name.
      * @return $this
      */
-    public function setClass($value) {
-        $this->currentRule['class'] = $value;
+    public function setClass($className) {
+        $this->currentRule['class'] = $className;
+     * @return $this
+     */
         return $this;
     }
 
@@ -96,11 +97,11 @@ class Container implements ContainerInterface {
     /**
      * Set the factory that will be used to create the instance for the current rule.
      *
-     * @param callable $value This callback will be called to create the instance for the rule.
+     * @param callable $factory This callback will be called to create the instance for the rule.
      * @return $this
      */
-    public function setFactory(callable $value) {
-        $this->currentRule['factory'] = $value;
+    public function setFactory(callable $factory) {
+        $this->currentRule['factory'] = $factory;
         return $this;
     }
 
@@ -116,11 +117,11 @@ class Container implements ContainerInterface {
     /**
      * Set whether or not the current rule is shared.
      *
-     * @param bool $value Whether or not the current rule is shared.
+     * @param bool $shared Whether or not the current rule is shared.
      * @return $this
      */
-    public function setShared($value) {
-        $this->currentRule['shared'] = $value;
+    public function setShared($shared) {
+        $this->currentRule['shared'] = $shared;
         return $this;
     }
 
@@ -136,11 +137,11 @@ class Container implements ContainerInterface {
     /**
      * Set whether or not the current rule extends to subclasses.
      *
-     * @param bool $value Pass **true** to have subclasses inherit this rule or **false** otherwise.
+     * @param bool $inherit Pass **true** to have subclasses inherit this rule or **false** otherwise.
      * @return $this
      */
-    public function setInherit($value) {
-        $this->currentRule['inherit'] = $value;
+    public function setInherit($inherit) {
+        $this->currentRule['inherit'] = $inherit;
         return $this;
     }
 
