@@ -2,7 +2,7 @@
 /**
  * @author Todd Burry <todd@vanillaforums.com>
  * @copyright 2009-2016 Vanilla Forums Inc.
- * @license Proprietary
+ * @license MIT
  */
 
 namespace Garden\Container\Tests\Fixtures;
@@ -13,7 +13,6 @@ class Foo implements FooAwareInterface {
     public $bar;
 
     // Do not add a constructor.
-
 
     public function setFoo($foo) {
         $this->foo = $foo;
