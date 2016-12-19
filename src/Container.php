@@ -14,6 +14,7 @@ use Interop\Container\ContainerInterface;
  */
 class Container implements ContainerInterface {
     private $currentRule;
+    private $currentRuleName;
     private $instances;
     private $rules;
     private $factories;
@@ -23,9 +24,10 @@ class Container implements ContainerInterface {
      */
     public function __construct() {
         $this->rules = ['*' => ['inherit' => true, 'constructorArgs' => null]];
-        $this->currentRule = &$this->rules['*'];
         $this->instances = [];
         $this->factories = [];
+
+        $this->rule('*');
     }
 
     /**
@@ -59,7 +61,9 @@ class Container implements ContainerInterface {
         if (!isset($this->rules[$id])) {
             $this->rules[$id] = [];
         }
+        $this->currentRuleName = $id;
         $this->currentRule = &$this->rules[$id];
+
         return $this;
     }
 
@@ -80,9 +84,97 @@ class Container implements ContainerInterface {
      */
     public function setClass($className) {
         $this->currentRule['class'] = $className;
+        return $this;
+    }
+
+    /**
+     * Get the rule that the current rule references.
+     *
+     * @return string Returns a reference name or an empty string if there is no reference.
+     */
+    public function getAliasOf() {
+        return empty($this->currentRule['aliasOf']) ? '' : $this->currentRule['aliasOf'];
+    }
+
+    /**
+     * Set the rule that the current rule is an alias of.
+     *
+     * @param string $alias The name of an entry in the container to point to.
      * @return $this
      */
+    public function setAliasOf($alias) {
+        $alias = $this->normalizeID($alias);
+
+        if ($alias === $this->currentRuleName) {
+            trigger_error("You cannot set alias '$alias' to itself.", E_USER_NOTICE);
+            return $this;
+        }
+
+        $this->currentRule['aliasOf'] = $alias;
         return $this;
+    }
+
+    /**
+     * Add an alias of the current rule.
+     *
+     * Setting an alias to the current rule means that getting an item with the alias' name will be like getting the item
+     * with the current rule. If the current rule is shared then the same shared instance will be returned.
+     *
+     * If {@link Container::addAlias()} is called with an alias that is the same as the current rule then an **E_USER_NOTICE**
+     * level error is raised and the alias is not added.
+     *
+     * @param string $alias The alias to set.
+     * @return $this
+     */
+    public function addAlias($alias) {
+        $alias = $this->normalizeID($alias);
+
+        if ($alias === $this->currentRuleName) {
+            trigger_error("Tried to set alias '$alias' to self.", E_USER_NOTICE);
+            return $this;
+        }
+
+        $this->rules[$alias]['aliasOf'] = $this->currentRuleName;
+        return $this;
+    }
+
+    /**
+     * Remove an alias of the current rule.
+     *
+     * If {@link Container::removeAlias()} is called with an alias that references a different rule then an **E_USER_NOTICE**
+     * level error is raised, but the alias is still removed.
+     *
+     * @param string $alias The alias to remove.
+     * @return $this
+     */
+    public function removeAlias($alias) {
+        $alias = $this->normalizeID($alias);
+
+        if (!empty($this->rules[$alias]['aliasOf']) && $this->rules[$alias]['aliasOf'] !== $this->currentRuleName) {
+            trigger_error("Alias '$alias' does not point to the current rule.", E_USER_NOTICE);
+        }
+
+        unset($this->rules[$alias]['aliasOf']);
+        return $this;
+    }
+
+    /**
+     * Get all of the aliases of the current rule.
+     *
+     * This method is intended to aid in debugging and should not be used in production as it walks the entire rule array.
+     *
+     * @return array Returns an array of strings representing aliases.
+     */
+    public function getAliases() {
+        $result = [];
+
+        foreach ($this->rules as $name => $rule) {
+            if (!empty($rule['aliasOf']) && $rule['aliasOf'] === $this->currentRuleName) {
+                $result[] = $name;
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -215,6 +307,11 @@ class Container implements ContainerInterface {
         if (isset($this->factories[$id])) {
             // The factory for this object type is already there so call it to create the instance.
             return $this->factories[$id]($args);
+        }
+
+        if (!empty($this->rules[$id]['aliasOf'])) {
+            // This rule references another rule.
+            return $this->getArgs($this->rules[$id]['aliasOf'], $args);
         }
 
         // The factory or instance isn't registered so do that now.
