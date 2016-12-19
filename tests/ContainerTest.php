@@ -60,41 +60,6 @@ class ContainerTest extends TestBase {
 
     }
 
-    public function testConstuctorArgs() {
-        $c = new Container();
-
-        $c->setConstructorArgs(['name' => 'foo']);
-
-        /** @var Db $db */
-        $db = $c->get(self::DB);
-        $this->assertSame('foo', $db->name);
-    }
-
-    public function testInheritedClass() {
-        $c = new Container();
-
-        $c
-            ->rule(self::DB)
-            ->setConstructorArgs(['foo']);
-
-        /** @var Db $db */
-        $db = $c->get(self::PDODB);
-        $this->assertSame('foo', $db->name);
-    }
-
-    public function testNonInheritedClass() {
-        $c = new Container();
-
-        $c
-            ->rule(self::DB)
-            ->setInherit(false)
-            ->setConstructorArgs(['foo']);
-
-        /** @var Db $db */
-        $db = $c->get(self::PDODB);
-        $this->assertNotSame('foo', $db->name);
-    }
-
     public function testBaicInjection() {
         $c = new Container();
 
@@ -221,6 +186,7 @@ class ContainerTest extends TestBase {
     /**
      * Trying to get a non-existent, unset name should throw a not found exception.
      *
+     * @param bool $shared Set the container to shared or not.
      * @dataProvider provideShared
      * @expectedException \Garden\Container\NotFoundException
      */
@@ -260,25 +226,5 @@ class ContainerTest extends TestBase {
 
         $this->assertSame(1, $tuple->a);
         $this->assertSame(2, $tuple->b);
-    }
-
-    /**
-     * When setting an object constructor argument it should override a dependency injection.
-     *
-     * @param bool $shared Whether or not the container is shared.
-     * @dataProvider provideShared
-     */
-    public function testConstructorArgsOverridingInjection($shared) {
-        $dic = new Container();
-
-        $db = new Db();
-
-        $dic->rule(self::SQL)
-            ->setShared(true)
-            ->setConstructorArgs([$db]);
-
-        /* @var Sql $sql */
-        $sql = $dic->get(self::SQL);
-        $this->assertSame($db, $sql->db);
     }
 }

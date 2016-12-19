@@ -22,7 +22,7 @@ class Container implements ContainerInterface {
      * Construct a new instance of the {@link Container} class.
      */
     public function __construct() {
-        $this->rules = ['*' => ['inherit' => true, 'constructorArgs' => []]];
+        $this->rules = ['*' => ['inherit' => true, 'constructorArgs' => null]];
         $this->currentRule = &$this->rules['*'];
         $this->instances = [];
         $this->factories = [];
@@ -247,14 +247,23 @@ class Container implements ContainerInterface {
             // Add interface calls to the rule.
             $interfaces = class_implements($nid);
             foreach ($interfaces as $interface) {
-                if (!empty($this->rules[$interface]['calls'])
-                    && (!isset($this->rules[$interface]['inherit']) || $this->rules[$interface]['inherit'] !== false)
-                ) {
+                if (isset($this->rules[$interface])) {
+                    $interfaceRule = $this->rules[$interface];
 
-                    $rule['calls'] = array_merge(
-                        isset($rule['calls']) ? $rule['calls'] : [],
-                        $this->rules[$interface]['calls']
-                    );
+                    if (isset($interfaceRule['inherit']) && $interfaceRule['inherit'] === false) {
+                        continue;
+                    }
+
+                    if (!isset($rule['constructorArgs']) && isset($interfaceRule['constructorArgs'])) {
+                        $rule['constructorArgs'] = $interfaceRule['constructorArgs'];
+                    }
+
+                    if (!empty($interfaceRule['calls'])) {
+                        $rule['calls'] = array_merge(
+                            isset($rule['calls']) ? $rule['calls'] : [],
+                            $interfaceRule['calls']
+                        );
+                    }
                 }
             }
         } elseif (!empty($this->rules['*']['inherit'])) {
@@ -282,7 +291,7 @@ class Container implements ContainerInterface {
             $function = $this->reflectCallback($callback);
 
             if ($function->getNumberOfParameters() > 0) {
-                $callbackArgs = $this->makeDefaultArgs($function, $rule['constructorArgs'], $rule);
+                $callbackArgs = $this->makeDefaultArgs($function, (array)$rule['constructorArgs'], $rule);
                 $factory = function ($args) use ($callback, $callbackArgs) {
                     return call_user_func_array($callback, $this->resolveArgs($callbackArgs, $args));
                 };
@@ -303,7 +312,7 @@ class Container implements ContainerInterface {
             $constructor = $class->getConstructor();
 
             if ($constructor && $constructor->getNumberOfParameters() > 0) {
-                $constructorArgs = $this->makeDefaultArgs($constructor, $rule['constructorArgs'], $rule);
+                $constructorArgs = $this->makeDefaultArgs($constructor, (array)$rule['constructorArgs'], $rule);
 
                 $factory = function ($args) use ($class, $constructorArgs) {
                     return $class->newInstanceArgs($this->resolveArgs($constructorArgs, $args));
@@ -365,7 +374,7 @@ class Container implements ContainerInterface {
 
             if ($function->getNumberOfParameters() > 0) {
                 $callbackArgs = $this->resolveArgs(
-                    $this->makeDefaultArgs($function, $rule['constructorArgs'], $rule),
+                    $this->makeDefaultArgs($function, (array)$rule['constructorArgs'], $rule),
                     $args
                 );
 
@@ -388,7 +397,7 @@ class Container implements ContainerInterface {
 
             if ($constructor && $constructor->getNumberOfParameters() > 0) {
                 $constructorArgs = $this->resolveArgs(
-                    $this->makeDefaultArgs($constructor, $rule['constructorArgs'], $rule),
+                    $this->makeDefaultArgs($constructor, (array)$rule['constructorArgs'], $rule),
                     $args
                 );
 
