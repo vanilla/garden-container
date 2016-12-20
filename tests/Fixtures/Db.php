@@ -8,7 +8,7 @@
 namespace Garden\Container\Tests\Fixtures;
 
 
-class Db {
+class Db implements DbInterface {
     public $name;
 
     public function __construct($name = 'localhost') {
