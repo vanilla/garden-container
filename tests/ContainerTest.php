@@ -291,4 +291,20 @@ class ContainerTest extends TestBase {
         $db2 = $dic->get('foo');
         $this->assertSame($db1, $db2);
     }
+
+    /**
+     * The container should be case-insensitive to classes that exist.
+     */
+    public function testCaseInsensitiveClass() {
+        require_once __DIR__.'/Fixtures/Db.php';
+
+        $dic = new Container();
+
+        $className = strtolower(self::DB);
+        $this->assertNotSame($className, self::DB);
+
+        /* @var Db $db */
+        $db = $dic->get($className);
+        $this->assertInstanceOf(self::DB, $db);
+    }
 }
