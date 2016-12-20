@@ -10,12 +10,12 @@ The Garden Container is a simple, but powerful dependency injection container.
 
 ## Features
 
-- Automatically wire dependencies using constructor type hints.
-- Dependencies can be shared across all objects.
+- Automatically wire dependencies using parameter type hints. You get a lot of functionality before you've done any configuration.
+- Create shared instances of objects without having to use difficult to test statics.
 - Dependencies can be configured for base classes and interfaces and shared amongst subclasses.
-- Setter injection can be configured via calls that are made after instantiation.
-- Dependencies can be configured to reference sub-containers for powerful object configuration.
-- You can change the classes that implement dependencies. This is great for unit testing.
+- Setter injection can be configured for classes in the container.
+- Dependencies can be configured to reference sub-containers. Use the container to inject properties from your config files.
+- You can change the classes that implement dependencies or specify the definitive class for an interface.
 - Objects can be constructed with custom factory functions to handle refactoring or edge-cases.
 
 ## The Basics of Dependency Injection
@@ -27,7 +27,6 @@ class Controller {
     public function __construct(Model $model) {
     }
 }
-
 
 class Model {
     public function __construct(PDO $db) {
@@ -54,7 +53,7 @@ A well designed application will rely heavily on auto-wiring and configure the c
 
 ## Configuring the Container with Rules
 
-You can override the behaviour of any class's instantiation using **rules**. To configure a rule for a class you use the `rule()` method to select the rule and then any of the various rule getters and setters.
+You can override the behaviour of any class's instantiation using rules. To configure a rule for a class you use the `rule()` method to select the rule and then any of the various rule getters and setters.
 
 ### Namespaces
 
@@ -235,7 +234,7 @@ The `Garden\Container` namespace defines a `ReferenceInterface` that you can imp
 
 You can set a specific object instance to the container with the `setInstance()` method. When you do this the object will always be shared. One use for setInstance is to put the container into itself so that it can be a dependency. This is considered an anti-pattern by some, but can be necessary.
 
-```
+```php
 class Dispatcher
     public function __construct(Container $dic) {
         $this->dic = $dic;
@@ -298,4 +297,4 @@ $item = $dic->get(Item::class);
 
 ## Acknowledgements
 
-This project is heavily inspired by the excellent [DICE](https://github.com/Level-2/Dice) and to a lesser extent [Aura.Di](https://github.com/auraphp/Aura.Di) projects. Any code in the Garden Container that resembles those projects probably is from there and remains the copyright of the respective owners. The developers of those projects are much more clever than we are.
+This project is heavily inspired by the excellent [DICE](https://github.com/Level-2/Dice) and to a lesser extent [Aura.Di](https://github.com/auraphp/Aura.Di) projects. Any code in the Garden Container that resembles those projects probably is from them and remains the copyright of the respective owners. The developers of those projects are much more clever than we are.
