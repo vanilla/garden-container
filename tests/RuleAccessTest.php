@@ -11,6 +11,9 @@ namespace Garden\Container\Tests;
 use Garden\Container\Container;
 use Garden\Container\Tests\Fixtures\Db;
 
+/**
+ * Test basic rule access.
+ */
 class RuleAccessTest extends TestBase {
     /**
      * A new container's default rule should have sensible defaults.
@@ -36,28 +39,34 @@ class RuleAccessTest extends TestBase {
      * @depends testDefaultRule
      */
     public function testGettersSetters(Container $c) {
-        $c->setClass(self::FOO);
+        $r = $c->setClass(self::FOO);
         $this->assertSame(self::FOO, $c->getClass());
+        $this->assertSame($c, $r);
 
-        $c->setInherit(false);
+        $r = $c->setInherit(false);
         $this->assertSame(false, $c->getInherit());
+        $this->assertSame($c, $r);
 
-        $c->setShared(true);
+        $r = $c->setShared(true);
         $this->assertSame(true, $c->isShared());
+        $this->assertSame($c, $r);
 
         $arr = [123];
-        $c->setConstructorArgs($arr);
+        $r = $c->setConstructorArgs($arr);
         $this->assertSame($arr, $c->getConstructorArgs());
+        $this->assertSame($c, $r);
 
         $callback = function () {
             return 'foo';
         };
-        $c->setFactory($callback);
+        $r = $c->setFactory($callback);
         $this->assertSame($callback, $c->getFactory());
+        $this->assertSame($c, $r);
 
         $alias = 'bar';
-        $c->setAliasOf($alias);
+        $r = $c->setAliasOf($alias);
         $this->assertSame($alias, $c->getAliasOf());
+        $this->assertSame($c, $r);
     }
 
     /**
@@ -153,11 +162,12 @@ class RuleAccessTest extends TestBase {
     public function testAddAliases() {
         $dic = new Container();
 
-        $dic->rule('foo')
+        $r = $dic->rule('foo')
             ->addAlias('bar')
             ->addAlias('baz');
 
         $this->assertEmpty(array_diff(['bar', 'baz'], $dic->getAliases()));
+        $this->assertSame($dic, $r);
     }
 
     /**
@@ -186,26 +196,43 @@ class RuleAccessTest extends TestBase {
 
     /**
      * Setting an alias to yourself should do nothing and raise a notice.
-     *
-     * @expectedException \PHPUnit_Framework_Error_Notice
      */
     public function testSetSameAliasNotice() {
         $dic = new Container();
 
         $dic->rule('foo')
             ->setAliasOf('foo');
+
+        $this->assertErrorNumber(E_USER_NOTICE);
+    }
+
+    /**
+     * Removing an alias of a different rule should generate a notice.
+     */
+    public function testRemoveDifferentAliasNotice() {
+        $dic = new Container();
+
+        $r = $dic->rule('foo')
+            ->addAlias('bar')
+            ->rule('baz')
+            ->removeAlias('bar');
+
+        $this->assertErrorNumber(E_USER_NOTICE);
+        $this->assertSame([], $dic->rule('foo')->getAliases());
+        $this->assertSame($dic, $r);
     }
 
     /**
      * Setting an alias to yourself should do nothing and raise a notice.
-     *
-     * @expectedException \PHPUnit_Framework_Error_Notice
      */
     public function testAddSameAliasNotice() {
         $dic = new Container();
 
-        $dic->rule('foo')
+        $r = $dic->rule('foo')
             ->addAlias('foo');
+
+        $this->assertErrorNumber(E_USER_NOTICE);
+        $this->assertSame($dic, $r);
     }
 
     /**

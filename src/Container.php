@@ -107,10 +107,9 @@ class Container implements ContainerInterface {
 
         if ($alias === $this->currentRuleName) {
             trigger_error("You cannot set alias '$alias' to itself.", E_USER_NOTICE);
-            return $this;
+        } else {
+            $this->currentRule['aliasOf'] = $alias;
         }
-
-        $this->currentRule['aliasOf'] = $alias;
         return $this;
     }
 
@@ -131,10 +130,9 @@ class Container implements ContainerInterface {
 
         if ($alias === $this->currentRuleName) {
             trigger_error("Tried to set alias '$alias' to self.", E_USER_NOTICE);
-            return $this;
+        } else {
+            $this->rules[$alias]['aliasOf'] = $this->currentRuleName;
         }
-
-        $this->rules[$alias]['aliasOf'] = $this->currentRuleName;
         return $this;
     }
 
@@ -628,16 +626,15 @@ class Container implements ContainerInterface {
      */
     public function call(callable $callback, array $args = []) {
         $instance = null;
-        if (is_string($callback) || $callback instanceof \Closure) {
-            $function = new \ReflectionFunction($callback);
-        } elseif (is_array($callback)) {
+
+        if (is_array($callback)) {
             $function = new \ReflectionMethod($callback[0], $callback[1]);
 
             if (is_object($callback[0])) {
                 $instance = $callback[0];
             }
         } else {
-            throw new ContainerException("Could not understand callback.", 500);
+            $function = new \ReflectionFunction($callback);
         }
 
         $args = $this->resolveArgs($this->makeDefaultArgs($function, $args), [], $instance);
