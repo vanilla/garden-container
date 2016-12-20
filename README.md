@@ -178,7 +178,6 @@ $um2 = $dic->get('UserModel');
 Rules can inherit from interfaces in a limited way. If you define a rule on an interface, any classes that implement it will call its method calls in addition to their own and also use the interface rule's constructor args if it doesn't have any defined itself.
 
 ```php
-
 $dic->rule('Psr\Log\LogAwareInterface')
     ->addCall('setLogger');
 ```
@@ -187,7 +186,7 @@ $dic->rule('Psr\Log\LogAwareInterface')
 
 There is a default rule that rules inherit from. You can modify this rule by selecting it with either the `defaultRule()` method or `rule('*')`.
 
-```
+```php
 $dic->defaultRule()
     ->setShared(true);
 // Now all objects are shared by default.
