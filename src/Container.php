@@ -655,7 +655,7 @@ class Container implements ContainerInterface {
     public function has($id) {
         $id = $this->normalizeID($id);
 
-        return isset($this->instances[$id]) || isset($this->rules[$id]) || class_exists($id);
+        return isset($this->instances[$id]) || !empty($this->rules[$id]) || class_exists($id);
     }
 
     /**
