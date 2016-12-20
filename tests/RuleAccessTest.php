@@ -186,57 +186,43 @@ class RuleAccessTest extends TestBase {
 
     /**
      * Setting an alias to yourself should do nothing and raise a notice.
-     *
-     * @expectedException \PHPUnit_Framework_Error_Notice
      */
     public function testSetSameAliasNotice() {
         $dic = new Container();
 
         $dic->rule('foo')
             ->setAliasOf('foo');
+
+        $this->assertErrorNumber(E_USER_NOTICE);
     }
 
     /**
      * Removing an alias of a different rule should generate a notice.
-     *
-     * @expectedException \PHPUnit_Framework_Error_Notice
      */
     public function testRemoveDifferentAliasNotice() {
         $dic = new Container();
 
-        $dic->rule('foo')
+        $r = $dic->rule('foo')
             ->addAlias('bar')
             ->rule('baz')
             ->removeAlias('bar');
-    }
 
-    /**
-     * Removing an alias of a different rule should still be removed.
-     */
-    public function testRemoveDifferentAlias() {
-        $dic = new Container();
-
-        \PHPUnit_Framework_Error_Notice::$enabled = false;
-            $dic->rule('foo')
-                ->addAlias('bar')
-                ->rule('baz')
-                ->removeAlias('bar');
-
+        $this->assertErrorNumber(E_USER_NOTICE);
         $this->assertSame([], $dic->rule('foo')->getAliases());
-
-        \PHPUnit_Framework_Error_Notice::$enabled = true;
+        $this->assertSame($dic, $r);
     }
 
     /**
      * Setting an alias to yourself should do nothing and raise a notice.
-     *
-     * @expectedException \PHPUnit_Framework_Error_Notice
      */
     public function testAddSameAliasNotice() {
         $dic = new Container();
 
-        $dic->rule('foo')
+        $r = $dic->rule('foo')
             ->addAlias('foo');
+
+        $this->assertErrorNumber(E_USER_NOTICE);
+        $this->assertSame($dic, $r);
     }
 
     /**
