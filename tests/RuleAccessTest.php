@@ -9,6 +9,7 @@ namespace Garden\Container\Tests;
 
 
 use Garden\Container\Container;
+use Garden\Container\Tests\Fixtures\Db;
 
 class RuleAccessTest extends TestBase {
     /**
@@ -66,6 +67,49 @@ class RuleAccessTest extends TestBase {
         $c = new Container();
 
         $this->assertTrue($c->hasRule('*'));
+    }
+
+    /**
+     * The container should report that any class that exists is in the container.
+     */
+    public function testContainerHasExistingClass() {
+        $dic = new Container();
+
+        $this->assertTrue($dic->has(self::DB));
+    }
+
+    /**
+     * The container should report that any rule name exists in the container.
+     */
+    public function testContainerHasRule() {
+        $dic = new Container();
+
+        $dic->rule('foo')
+            ->setClass(self::DB);
+
+        $this->assertTrue($dic->has('foo'));
+    }
+
+    /**
+     * The container should not have a rule just because it is simply selected.
+     */
+    public function testContainerDoesNotHaveEmptyRule() {
+        $dic = new Container();
+
+        $dic->rule('foo');
+
+        $this->assertFalse($dic->has('foo'));
+    }
+
+    /**
+     * The container should contain named instances.
+     */
+    public function testContainerHasInstance() {
+        $dic = new Container();
+
+        $dic->setInstance('foo', new Db());
+
+        $this->assertTrue($dic->has('foo'));
     }
 
     /**
