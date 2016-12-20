@@ -197,6 +197,37 @@ class RuleAccessTest extends TestBase {
     }
 
     /**
+     * Removing an alias of a different rule should generate a notice.
+     *
+     * @expectedException \PHPUnit_Framework_Error_Notice
+     */
+    public function testRemoveDifferentAliasNotice() {
+        $dic = new Container();
+
+        $dic->rule('foo')
+            ->addAlias('bar')
+            ->rule('baz')
+            ->removeAlias('bar');
+    }
+
+    /**
+     * Removing an alias of a different rule should still be removed.
+     */
+    public function testRemoveDifferentAlias() {
+        $dic = new Container();
+
+        \PHPUnit_Framework_Error_Notice::$enabled = false;
+            $dic->rule('foo')
+                ->addAlias('bar')
+                ->rule('baz')
+                ->removeAlias('bar');
+
+        $this->assertSame([], $dic->rule('foo')->getAliases());
+
+        \PHPUnit_Framework_Error_Notice::$enabled = true;
+    }
+
+    /**
      * Setting an alias to yourself should do nothing and raise a notice.
      *
      * @expectedException \PHPUnit_Framework_Error_Notice

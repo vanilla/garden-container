@@ -198,6 +198,9 @@ class ContainerTest extends TestBase {
             ->get('adsf');
     }
 
+    /**
+     * Test {@link Container::call()}
+     */
     public function testBasicCall() {
         $c = new Container();
 
@@ -209,6 +212,39 @@ class ContainerTest extends TestBase {
 
         $c->call([$sql, 'setDb']);
         $this->assertInstanceOf(self::DB, $sql->db);
+    }
+
+    /**
+     * Test {@link Container::call()} with a closure.
+     */
+    public function testCallClosure() {
+        $dic = new Container();
+
+        $called = false;
+
+        $dic->call(function (Db $db) use (&$called) {
+            $called = true;
+            $this->assertInstanceOf(self::DB, $db);
+        });
+
+        $this->assertTrue($called);
+    }
+
+    /**
+     * Global functions should be callabe with {@link Container::call()}.
+     */
+    public function testCallFunction() {
+        require_once __DIR__.'/Fixtures/functions.php';
+
+        $dic = new Container();
+        $dic->setShared(true);
+
+
+        $dic->call('Garden\Container\Tests\Fixtures\setDbName', ['func']);
+
+        /* @var Db $db */
+        $db = $dic->get(self::DB);
+        $this->assertSame('func', $db->name);
     }
 
     public function testCallback() {
