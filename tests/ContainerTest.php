@@ -9,7 +9,6 @@ namespace Garden\Container\Tests;
 
 use Garden\Container\Callback;
 use Garden\Container\Container;
-use Garden\Container\DefaultReference;
 use Garden\Container\Reference;
 use Garden\Container\Tests\Fixtures\Db;
 use Garden\Container\Tests\Fixtures\Sql;
@@ -17,64 +16,64 @@ use Garden\Container\Tests\Fixtures\Tuple;
 
 class ContainerTest extends TestBase {
     public function testBasicConstruction() {
-        $c = new Container();
-        $db = $c->get(self::DB);
+        $dic = new Container();
+        $db = $dic->get(self::DB);
 
         $this->assertInstanceOf(self::DB, $db);
     }
 
     public function testNotSharedConstruction() {
-        $c = new Container();
+        $dic = new Container();
 
-        $db1 = $c->get(self::DB);
-        $db2 = $c->get(self::DB);
+        $db1 = $dic->get(self::DB);
+        $db2 = $dic->get(self::DB);
         $this->assertNotSame($db1, $db2);
     }
 
     public function testSharedConstuction() {
-        $c = new Container();
+        $dic = new Container();
 
-        $c->setShared(true);
-        $db1 = $c->get(self::DB);
-        $db2 = $c->get(self::DB);
+        $dic->setShared(true);
+        $db1 = $dic->get(self::DB);
+        $db2 = $dic->get(self::DB);
         $this->assertSame($db1, $db2);
     }
 
     public function testConstrucWithPassedArgs() {
-        $c = new Container();
+        $dic = new Container();
 
         /** @var Db $db */
-        $db = $c->getArgs(self::DB, ['foo']);
+        $db = $dic->getArgs(self::DB, ['foo']);
         $this->assertSame('foo', $db->name);
     }
 
     public function testConstructDifferentClass() {
-        $c = new Container();
+        $dic = new Container();
 
-        $c
+        $dic
             ->rule(self::DB)
             ->setClass(self::PDODB);
 
-        $db = $c->get(self::DB);
+        $db = $dic->get(self::DB);
         $this->assertInstanceOf(self::DB, $db);
 
     }
 
     public function testBaicInjection() {
-        $c = new Container();
+        $dic = new Container();
 
-        /** @var Sql $sql */
-        $sql = $c->get(self::SQL);
+        /* @var Sql $sql */
+        $sql = $dic->get(self::SQL);
         $this->assertInstanceOf(self::DB, $sql->db);
     }
 
     public function testSetInstance() {
-        $c = new Container();
+        $dic = new Container();
 
         $db = new Db();
 
-        $c->setInstance(get_class($db), $db);
-        $db2 = $c->get(get_class($db));
+        $dic->setInstance(get_class($db), $db);
+        $db2 = $dic->get(get_class($db));
 
         $this->assertSame($db, $db2);
     }
@@ -86,15 +85,14 @@ class ContainerTest extends TestBase {
      * @dataProvider provideShared
      */
     public function testCalls($shared) {
-        $c = new Container();
+        $dic = new Container();
 
-        $c
-            ->rule(self::TUPLE)
+        $dic->rule(self::TUPLE)
             ->setShared($shared)
             ->setConstructorArgs(['a', 'b'])
             ->addCall('setA', ['foo']);
 
-        $t = $c->get(self::TUPLE);
+        $t = $dic->get(self::TUPLE);
         $this->assertSame('foo', $t->a);
         $this->assertSame('b', $t->b);
     }
@@ -106,11 +104,11 @@ class ContainerTest extends TestBase {
      * @dataProvider provideShared
      */
     public function testNoConstructor($shared) {
-        $c = new Container();
+        $dic = new Container();
 
-        $c->setShared($shared);
+        $dic->setShared($shared);
 
-        $o = $c->get(self::FOO);
+        $o = $dic->get(self::FOO);
         $this->assertInstanceOf(self::FOO, $o);
     }
 
@@ -133,12 +131,12 @@ class ContainerTest extends TestBase {
      * Test interface call rules.
      */
     public function testInterfaceCalls() {
-        $c = new Container();
+        $dic = new Container();
 
-        $c->rule(self::FOO_AWARE)
+        $dic->rule(self::FOO_AWARE)
             ->addCall('setFoo', [123]);
 
-        $foo = $c->get(self::FOO);
+        $foo = $dic->get(self::FOO);
         $this->assertSame(123, $foo->foo);
     }
 
@@ -146,15 +144,14 @@ class ContainerTest extends TestBase {
      * Interface calls should stack with rule calls.
      */
     public function testInterfaceCallMerging() {
-        $c = new Container();
+        $dic = new Container();
 
-        $c
-            ->rule(self::FOO_AWARE)
+        $dic->rule(self::FOO_AWARE)
             ->addCall('setFoo', [123])
             ->defaultRule()
             ->addCall('setBar', [456]);
 
-        $foo = $c->get(self::FOO);
+        $foo = $dic->get(self::FOO);
         $this->assertSame(123, $foo->foo);
         $this->assertSame(456, $foo->bar);
     }
@@ -163,11 +160,11 @@ class ContainerTest extends TestBase {
      * A named arg should override injections.
      */
     public function testNamedInjectedArg() {
-        $c = new Container();
+        $dic = new Container();
 
         $db = new Db();
         /* @var Sql $sql */
-        $sql = $c->getArgs(self::SQL, ['db' => $db]);
+        $sql = $dic->getArgs(self::SQL, ['db' => $db]);
         $this->assertSame($db, $sql->db);
     }
 
@@ -175,11 +172,11 @@ class ContainerTest extends TestBase {
      * A positional arg should override injections.
      */
     public function testPositionalInjectedArg() {
-        $c = new Container();
+        $dic = new Container();
 
         $db = new Db();
         /* @var Sql $sql */
-        $sql = $c->getArgs(self::SQL, [$db]);
+        $sql = $dic->getArgs(self::SQL, [$db]);
         $this->assertSame($db, $sql->db);
     }
 
@@ -191,10 +188,9 @@ class ContainerTest extends TestBase {
      * @expectedException \Garden\Container\NotFoundException
      */
     public function testNotFoundException($shared) {
-        $c = new Container();
+        $dic = new Container();
 
-        $o = $c
-            ->setShared($shared)
+        $dic->setShared($shared)
             ->get('adsf');
     }
 
@@ -202,15 +198,15 @@ class ContainerTest extends TestBase {
      * Test {@link Container::call()}
      */
     public function testBasicCall() {
-        $c = new Container();
+        $dic = new Container();
 
         /**
          * @var Sql $sql
          */
-        $sql = $c->getArgs(self::SQL, ['db' => null]);
+        $sql = $dic->getArgs(self::SQL, ['db' => null]);
         $this->assertNull($sql->db);
 
-        $c->call([$sql, 'setDb']);
+        $dic->call([$sql, 'setDb']);
         $this->assertInstanceOf(self::DB, $sql->db);
     }
 
@@ -231,7 +227,7 @@ class ContainerTest extends TestBase {
     }
 
     /**
-     * Global functions should be callabe with {@link Container::call()}.
+     * Global functions should be callable with {@link Container::call()}.
      */
     public function testCallFunction() {
         require_once __DIR__.'/Fixtures/functions.php';
@@ -247,8 +243,11 @@ class ContainerTest extends TestBase {
         $this->assertSame('func', $db->name);
     }
 
+    /**
+     *
+     */
     public function testCallback() {
-        $c = new Container();
+        $dic = new Container();
 
         $i = 1;
         $cb = new Callback(function () use (&$i) {
@@ -258,7 +257,7 @@ class ContainerTest extends TestBase {
         /**
          * @var Tuple $tuple
          */
-        $tuple = $c->getArgs(self::TUPLE, [$cb, $cb]);
+        $tuple = $dic->getArgs(self::TUPLE, [$cb, $cb]);
 
         $this->assertSame(1, $tuple->a);
         $this->assertSame(2, $tuple->b);
@@ -306,5 +305,46 @@ class ContainerTest extends TestBase {
         /* @var Db $db */
         $db = $dic->get($className);
         $this->assertInstanceOf(self::DB, $db);
+    }
+
+    /**
+     * An interface should be able to mark rules ahred.
+     */
+    public function testSharedInterface() {
+        $dic = new Container();
+
+
+        $dic->rule(self::DB_INTERFACE)
+            ->setShared(true);
+
+        $db1 = $dic->get(self::DB);
+        $db2 = $dic->get(self::DB);
+
+        $this->assertSame($db1, $db2);
+    }
+
+    /**
+     * An interface should not override a class shared rule.
+     *
+     * @param bool $shared Whether or not the interface should be shared.
+     * @dataProvider provideShared
+     */
+    public function testClassInterfaceSharedPrecedence($shared) {
+        $dic = new Container();
+
+        $dic->rule(self::DB)
+            ->setShared($shared)
+
+            ->rule(self::DB_INTERFACE)
+            ->setShared(!$shared);
+
+        $db1 = $dic->get(self::DB);
+        $db2 = $dic->get(self::DB);
+
+        if ($shared) {
+            $this->assertSame($db1, $db2);
+        } else {
+            $this->assertNotSame($db1, $db2);
+        }
     }
 }
