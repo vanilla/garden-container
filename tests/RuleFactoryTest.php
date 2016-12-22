@@ -132,16 +132,16 @@ class RuleFactoryTest extends TestBase {
      * @dataProvider provideShared
      */
     public function testCalls($shared) {
-        $c = new Container();
+        $dic = new Container();
 
-        $c
+        $dic->setShared($shared)
             ->setFactory([self::FOO, 'create'])
             ->addCall('setFoo', ['foo'])
             ->addCall('setBar', ['bar'])
             ;
 
         /* @var \Garden\Container\Tests\Fixtures\Foo $foo */
-        $foo = $c->get(self::FOO);
+        $foo = $dic->get(self::FOO);
         $this->assertSame('foo', $foo->foo);
         $this->assertSame('bar', $foo->bar);
     }

@@ -350,6 +350,10 @@ class Container implements ContainerInterface {
                         continue;
                     }
 
+                    if (!isset($rule['shared']) && isset($interfaceRule['shared'])) {
+                        $rule['shared'] = $interfaceRule['shared'];
+                    }
+
                     if (!isset($rule['constructorArgs']) && isset($interfaceRule['constructorArgs'])) {
                         $rule['constructorArgs'] = $interfaceRule['constructorArgs'];
                     }
@@ -461,8 +465,6 @@ class Container implements ContainerInterface {
      * @throws NotFoundException Throws an exception if the class does not exist.
      */
     private function createSharedInstance($nid, array $rule, array $args) {
-        $className = empty($rule['class']) ? $nid : $rule['class'];
-
         if (!empty($rule['factory'])) {
             // The instance is created with a user-supplied factory function.
             $callback = $rule['factory'];
@@ -480,11 +482,12 @@ class Container implements ContainerInterface {
                 $this->instances[$nid] = $instance = $callback();
             }
 
-            // If a class is specified then still reflect on it so that calls can be made against it.
-            if (class_exists($className)) {
-                $class = new \ReflectionClass($className);
+            // Reflect on the instance so that calls can be made against it.
+            if (is_object($instance)) {
+                $class = new \ReflectionClass(get_class($instance));
             }
         } else {
+            $className = empty($rule['class']) ? $nid : $rule['class'];
             if (!class_exists($className)) {
                 throw new NotFoundException("Class $className does not exist.", 404);
             }
