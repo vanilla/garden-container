@@ -127,4 +127,17 @@ class ConstructorArgsTest extends TestBase {
         $db = $dic->get(self::PDODB);
         $this->assertSame('localhost', $db->name);
     }
+
+    /**
+     * A constructor with an interface hint should not fail if there is no rule for the interface.
+     */
+    public function testRulelessInterfaceHint() {
+        $dic = new Container();
+
+        /* @var \Garden\Container\Tests\Fixtures\DbDecorator $db */
+        $db = $dic->get(self::DB_DECORATOR);
+
+        $this->assertInstanceOf(self::DB_DECORATOR, $db);
+        $this->assertSame('default', $db->db->name);
+    }
 }
