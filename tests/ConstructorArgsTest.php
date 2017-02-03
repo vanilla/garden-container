@@ -140,4 +140,37 @@ class ConstructorArgsTest extends TestBase {
         $this->assertInstanceOf(self::DB_DECORATOR, $db);
         $this->assertSame('default', $db->db->name);
     }
+
+    /**
+     * A constructor with an interface hint should work when there is an instance for the interface.
+     */
+    public function testRulelessInterfaceHintWithInstance() {
+        $dic = new Container();
+
+        $dbInst = new Db('foo');
+        $dic->setInstance(self::DB_INTERFACE, $dbInst);
+
+        /* @var \Garden\Container\Tests\Fixtures\DbDecorator $db */
+        $db = $dic->get(self::DB_DECORATOR);
+
+        $this->assertInstanceOf(self::DB_DECORATOR, $db);
+        $this->assertSame($dbInst, $db->db);
+    }
+
+    /**
+     * A constructor with an interface hint should work when there is a rule for the interface.
+     */
+    public function testRulelessInterfaceHintWithRule() {
+        $dic = new Container();
+
+        $dic->rule(self::DB_INTERFACE)
+            ->setClass(self::DB)
+            ->setConstructorArgs(['rule']);
+
+        /* @var \Garden\Container\Tests\Fixtures\DbDecorator $db */
+        $db = $dic->get(self::DB_DECORATOR);
+
+        $this->assertInstanceOf(self::DB_DECORATOR, $db);
+        $this->assertSame('rule', $db->db->name);
+    }
 }
