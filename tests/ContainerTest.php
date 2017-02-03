@@ -347,4 +347,13 @@ class ContainerTest extends TestBase {
             $this->assertNotSame($db1, $db2);
         }
     }
+
+    /**
+     * The container should not have an interface.
+     */
+    public function testDoesNotHaveInterface() {
+        $dic = new Container();
+
+        $this->assertFalse($dic->has(self::DB_INTERFACE));
+    }
 }

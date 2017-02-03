@@ -11,6 +11,7 @@ namespace Garden\Container\Tests;
 abstract class TestBase extends \PHPUnit_Framework_TestCase {
     const DB = 'Garden\Container\Tests\Fixtures\Db';
     const DB_INTERFACE = 'Garden\Container\Tests\Fixtures\DbInterface';
+    const DB_DECORATOR = 'Garden\Container\Tests\Fixtures\DbDecorator';
     const FOO = 'Garden\Container\Tests\Fixtures\Foo';
     const FOO_AWARE = 'Garden\Container\Tests\Fixtures\FooAwareInterface';
     const PDODB = 'Garden\Container\Tests\Fixtures\PdoDb';
