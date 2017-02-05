@@ -495,13 +495,13 @@ class Container implements ContainerInterface {
             $constructor = $class->getConstructor();
 
             if ($constructor && $constructor->getNumberOfParameters() > 0) {
+                // Instantiate the object first so that this instance can be used for cyclic dependencies.
+                $this->instances[$nid] = $instance = $class->newInstanceWithoutConstructor();
+
                 $constructorArgs = $this->resolveArgs(
                     $this->makeDefaultArgs($constructor, (array)$rule['constructorArgs'], $rule),
                     $args
                 );
-
-                // Instantiate the object first so that this instance can be used for cyclic dependencies.
-                $this->instances[$nid] = $instance = $class->newInstanceWithoutConstructor();
                 $constructor->invokeArgs($instance, $constructorArgs);
             } else {
                 $this->instances[$nid] = $instance = new $class->name;
