@@ -9,6 +9,7 @@ namespace Garden\Container\Tests;
 
 
 use Garden\Container\Container;
+use Garden\Container\Reference;
 use Garden\Container\Tests\Fixtures\Db;
 
 class ConstructorArgsTest extends TestBase {
@@ -172,5 +173,21 @@ class ConstructorArgsTest extends TestBase {
 
         $this->assertInstanceOf(self::DB_DECORATOR, $db);
         $this->assertSame('rule', $db->db->name);
+    }
+
+    /**
+     * Shared classes should allow cyclic dependencies.
+     */
+    public function testCyclicSharedDependency() {
+        $dic = new Container();
+
+        $dic->rule(self::DB_DECORATOR)
+            ->setShared(true)
+            ->setConstructorArgs(['db' => new Reference(self::DB_DECORATOR)]);
+
+        /* @var \Garden\Container\Tests\Fixtures\DbDecorator $db */
+        $db = $dic->get(self::DB_DECORATOR);
+
+        $this->assertSame($db,$db->db);
     }
 }
