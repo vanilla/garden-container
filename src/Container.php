@@ -414,8 +414,8 @@ class Container implements ContainerInterface {
             if ($constructor && $constructor->getNumberOfParameters() > 0) {
                 $constructorArgs = $this->makeDefaultArgs($constructor, (array)$rule['constructorArgs'], $rule);
 
-                $factory = function ($args) use ($class, $constructorArgs) {
-                    return $class->newInstanceArgs($this->resolveArgs($constructorArgs, $args));
+                $factory = function ($args) use ($className, $constructorArgs) {
+                    return new $className(...array_values($this->resolveArgs($constructorArgs, $args)));
                 };
             } else {
                 $factory = function () use ($className) {
