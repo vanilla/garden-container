@@ -31,6 +31,33 @@ class Container implements ContainerInterface {
     }
 
     /**
+     * Deep clone rules.
+     */
+    public function __clone() {
+        $this->rules = $this->arrayClone($this->rules);
+        $this->rule($this->currentRuleName);
+    }
+
+    /**
+     * Deep clone an array.
+     *
+     * @param array $array The array to clone.
+     * @return array Returns the cloned array.
+     * @see http://stackoverflow.com/a/17729234
+     */
+    private function arrayClone(array $array) {
+        return array_map(function ($element) {
+            return ((is_array($element))
+                ? $this->arrayClone($element)
+                : ((is_object($element))
+                    ? clone $element
+                    : $element
+                )
+            );
+        }, $array);
+    }
+
+    /**
      * Normalize a container entry ID.
      *
      * @param string $id The ID to normalize.
