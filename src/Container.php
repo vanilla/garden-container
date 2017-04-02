@@ -556,7 +556,7 @@ class Container implements ContainerInterface {
             } elseif ($param->isDefaultValueAvailable()) {
                 $value = $param->getDefaultValue();
             } else {
-                $value = null;
+                $value = new RequiredParameter($param);
             }
 
             $result[$name] = $value;
@@ -572,28 +572,30 @@ class Container implements ContainerInterface {
      * @param array $args The arguments passed into a creation.
      * @param mixed $instance An object instance if the arguments are being resolved on an already constructed object.
      * @return array Returns an array suitable to be applied to a function call.
+     * @throws MissingArgumentException Throws an exception when a required parameter is missing.
      */
     private function resolveArgs(array $defaultArgs, array $args, $instance = null) {
         $args = array_change_key_case($args);
 
         $pos = 0;
-        foreach ($defaultArgs as $name => &$arg) {
+        foreach ($defaultArgs as $name => &$default) {
             if (array_key_exists($name, $args)) {
                 // This is a named arg and should be used.
                 $value = $args[$name];
-            } elseif (isset($args[$pos]) && (!($arg instanceof DefaultReference) || is_a($args[$pos], $arg->getName()))) {
+            } elseif (isset($args[$pos]) && (!($default instanceof DefaultReference) || empty($default->getClass()) || is_a($args[$pos], $default->getClass()))) {
                 // There is an arg at this position and it's the same type as the default arg or the default arg is typeless.
                 $value = $args[$pos];
                 $pos++;
             } else {
                 // There is no passed arg, so use the default arg.
-                $value = $arg;
+                $value = $default;
             }
 
             if ($value instanceof ReferenceInterface) {
                 $value = $value->resolve($this, $instance);
             }
-            $arg = $value;
+
+            $default = $value;
         }
 
         return $defaultArgs;
