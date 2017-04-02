@@ -21,11 +21,11 @@ class RequiredParameter extends DefaultReference {
      * @param \ReflectionParameter $param The required parameter.
      */
     public function __construct(\ReflectionParameter $param) {
-        parent::__construct($param->getClass() ? $param->getClass()->getName() : '');
+        parent::__construct($param->getClass() ? $param->getClass()->name : '');
 
-        $this->parameter = $param->getName();
-        $this->function = ($param->getDeclaringClass() ? $param->getDeclaringClass()->getName().'::' : '').
-            $param->getDeclaringFunction()->getName().'()';
+        $this->parameter = $param->name;
+        $this->function = ($param->getDeclaringClass() ? $param->getDeclaringClass()->name.'::' : '').
+            $param->getDeclaringFunction()->name.'()';
     }
 
 
