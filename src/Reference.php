@@ -17,12 +17,19 @@ class Reference implements ReferenceInterface {
     private $name;
 
     /**
+     * @var array
+     */
+    private $args;
+
+    /**
      * Construct a new instance of the {@link Reference} class.
      *
      * @param string|array $name The name of the reference.
+     * @param array $args Constructor arguments for the reference.
      */
-    public function __construct($name) {
+    public function __construct($name, array $args = []) {
         $this->setName($name);
+        $this->setArgs($args);
     }
 
     /**
@@ -50,7 +57,7 @@ class Reference implements ReferenceInterface {
         if (empty($this->name)) {
             return null;
         } elseif (is_string($this->name)) {
-            return $container->get($this->name);
+            return $container->getArgs($this->name, $this->args);
         } else {
             $result = $container;
             foreach ($this->name as $name) {
@@ -58,5 +65,25 @@ class Reference implements ReferenceInterface {
             }
             return $result;
         }
+    }
+
+    /**
+     * Get constructor arguments for the the reference.
+     *
+     * @return array Returns the arguments.
+     */
+    public function getArgs() {
+        return $this->args;
+    }
+
+    /**
+     * Set constructor arguments for the the reference.
+     *
+     * @param array $args An array of arguments.
+     * @return $this
+     */
+    public function setArgs($args) {
+        $this->args = $args;
+        return $this;
     }
 }
