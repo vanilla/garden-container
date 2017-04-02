@@ -204,6 +204,7 @@ class ConstructorArgsTest extends TestBase {
      */
     public function testMissingRequiredParams($shared) {
         $dic = new Container();
+        $dic->setShared($shared);
 
         $m = $dic->get(FooConsumer::class);
     }
@@ -216,9 +217,73 @@ class ConstructorArgsTest extends TestBase {
      */
     public function testPassingRequiredParam($shared) {
         $dic = new Container();
+        $dic->setShared($shared);
         $foo = new Foo();
 
         $r = $dic->getArgs(FooConsumer::class, [$foo]);
         $this->assertSame($foo, $r->foo);
+    }
+
+    /**
+     * I should be able to pass a required parameter by ordinal reference.
+     *
+     * @param bool $shared Shared or factory construction.
+     * @dataProvider provideShared
+     */
+    public function testOrdinalReferenceArg($shared) {
+        $dic = (new Container())->setShared($shared);
+
+        $r = $dic->getArgs(FooConsumer::class, [new Reference(Foo::class)]);
+    }
+
+    /**
+     * I should be able to set constructor arguments by ordinal reference.
+     *
+     * @param bool $shared Shared or factory construction.
+     * @dataProvider provideShared
+     */
+    public function testOrdinalConstructorReferenceArg($shared) {
+        $dic = (new Container())->setShared($shared);
+
+        $dic->rule(FooConsumer::class)
+            ->setConstructorArgs([new Reference(Foo::class)]);
+
+        $r = $dic->get(FooConsumer::class);
+    }
+
+    /**
+     * I should be able to override reference arguments by ordinal.
+     *
+     * @param bool $shared Shared or factory construction.
+     * @dataProvider provideShared
+     */
+    public function testOrdinalConstructorReferenceArgOverride($shared) {
+        $dic = (new Container())->setShared($shared);
+
+        $dic->rule(FooConsumer::class)
+            ->setConstructorArgs([new Reference(Foo::class)]);
+
+        $foo = new Foo();
+
+        $r = $dic->getArgs(FooConsumer::class, [$foo]);
+        $this->assertSame($foo, $r->foo);
+    }
+
+    /**
+     * I should be able to override reference arguments by ordinal reference.
+     *
+     * @param bool $shared Shared or factory construction.
+     * @dataProvider provideShared
+     */
+    public function testReferenceOverride($shared) {
+        $dic = (new Container())->setShared($shared);
+
+        $dic->rule(FooConsumer::class)
+            ->setConstructorArgs([new Reference(Foo::class)]);
+
+        $dic->setInstance('baz', new Foo());
+
+        $r = $dic->getArgs(FooConsumer::class, [new Reference('baz')]);
+        $this->assertSame($dic->get('baz'), $r->foo);
     }
 }
