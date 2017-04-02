@@ -44,11 +44,11 @@ class ReferenceAccessTest extends TestBase {
         $name = 'foo';
 
         $r = new DefaultReference($name);
-        $this->assertSame($name, $r->getName());
+        $this->assertSame($name, $r->getClass());
 
         $name2 = 'bar';
-        $r->setName($name2);
-        $this->assertSame($name2, $r->getName());
+        $r->setClass($name2);
+        $this->assertSame($name2, $r->getClass());
     }
 
     public function testEmptyReferenceResolution() {
