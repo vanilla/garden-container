@@ -11,6 +11,9 @@ namespace Garden\Container\Tests;
 use Garden\Container\Container;
 use Garden\Container\Reference;
 use Garden\Container\Tests\Fixtures\Db;
+use Garden\Container\Tests\Fixtures\Foo;
+use Garden\Container\Tests\Fixtures\FooConsumer;
+use Interop\Container\Exception\ContainerException;
 
 class ConstructorArgsTest extends TestBase {
     /**
@@ -98,6 +101,7 @@ class ConstructorArgsTest extends TestBase {
 
     /**
      * Class constructor args should have a higher priority than interface constructor args.
+     *
      */
     public function testInterfaceConstructorArgsPriority() {
         $dic = new Container();
@@ -188,6 +192,33 @@ class ConstructorArgsTest extends TestBase {
         /* @var \Garden\Container\Tests\Fixtures\DbDecorator $db */
         $db = $dic->get(self::DB_DECORATOR);
 
-        $this->assertSame($db,$db->db);
+        $this->assertSame($db, $db->db);
+    }
+
+    /**
+     * Missing constructor parameters should throw an exception that can be understood.
+     *
+     * @param bool $shared Shared or factory construction.
+     * @expectedException \Interop\Container\Exception\ContainerException
+     * @dataProvider provideShared
+     */
+    public function testMissingRequiredParams($shared) {
+        $dic = new Container();
+
+        $m = $dic->get(FooConsumer::class);
+    }
+
+    /**
+     * I should be able to pass a required parameter by name.
+     *
+     * @param bool $shared Shared or factory construction.
+     * @dataProvider provideShared
+     */
+    public function testPassingRequiredParam($shared) {
+        $dic = new Container();
+        $foo = new Foo();
+
+        $r = $dic->getArgs(FooConsumer::class, [$foo]);
+        $this->assertSame($foo, $r->foo);
     }
 }

@@ -573,17 +573,17 @@ class Container implements ContainerInterface {
             if (array_key_exists($name, $ruleArgs)) {
                 $value = $ruleArgs[$name];
             } elseif ($param->getClass()
-                && !(isset($ruleArgs[$pos]) && is_object($ruleArgs[$pos]) && get_class($ruleArgs[$pos]) === $param->getClass()->getName())
-                && ($param->getClass()->isInstantiable() || isset($this->rules[$param->getClass()->getName()]) || array_key_exists($param->getClass()->getName(), $this->instances))
+                && !(isset($ruleArgs[$pos]) && is_object($ruleArgs[$pos]) && get_class($ruleArgs[$pos]) === $param->getClass()->name)
+                && ($param->getClass()->isInstantiable() || isset($this->rules[$param->getClass()->name]) || array_key_exists($param->getClass()->name, $this->instances))
             ) {
-                $value = new DefaultReference($this->normalizeID($param->getClass()->getName()));
+                $value = new DefaultReference($this->normalizeID($param->getClass()->name));
             } elseif (array_key_exists($pos, $ruleArgs)) {
                 $value = $ruleArgs[$pos];
                 $pos++;
             } elseif ($param->isDefaultValueAvailable()) {
                 $value = $param->getDefaultValue();
             } else {
-                $value = null;
+                $value = new RequiredParameter($param);
             }
 
             $result[$name] = $value;
@@ -599,28 +599,30 @@ class Container implements ContainerInterface {
      * @param array $args The arguments passed into a creation.
      * @param mixed $instance An object instance if the arguments are being resolved on an already constructed object.
      * @return array Returns an array suitable to be applied to a function call.
+     * @throws MissingArgumentException Throws an exception when a required parameter is missing.
      */
     private function resolveArgs(array $defaultArgs, array $args, $instance = null) {
         $args = array_change_key_case($args);
 
         $pos = 0;
-        foreach ($defaultArgs as $name => &$arg) {
+        foreach ($defaultArgs as $name => &$default) {
             if (array_key_exists($name, $args)) {
                 // This is a named arg and should be used.
                 $value = $args[$name];
-            } elseif (isset($args[$pos]) && (!($arg instanceof DefaultReference) || is_a($args[$pos], $arg->getName()))) {
+            } elseif (isset($args[$pos]) && (!($default instanceof DefaultReference) || empty($default->getClass()) || is_a($args[$pos], $default->getClass()))) {
                 // There is an arg at this position and it's the same type as the default arg or the default arg is typeless.
                 $value = $args[$pos];
                 $pos++;
             } else {
                 // There is no passed arg, so use the default arg.
-                $value = $arg;
+                $value = $default;
             }
 
             if ($value instanceof ReferenceInterface) {
                 $value = $value->resolve($this, $instance);
             }
-            $arg = $value;
+
+            $default = $value;
         }
 
         return $defaultArgs;
