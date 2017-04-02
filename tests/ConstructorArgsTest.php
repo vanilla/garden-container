@@ -204,6 +204,7 @@ class ConstructorArgsTest extends TestBase {
      */
     public function testMissingRequiredParams($shared) {
         $dic = new Container();
+        $dic->setShared($shared);
 
         $m = $dic->get(FooConsumer::class);
     }
@@ -216,6 +217,7 @@ class ConstructorArgsTest extends TestBase {
      */
     public function testPassingRequiredParam($shared) {
         $dic = new Container();
+        $dic->setShared($shared);
         $foo = new Foo();
 
         $r = $dic->getArgs(FooConsumer::class, [$foo]);

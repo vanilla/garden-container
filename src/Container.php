@@ -602,7 +602,13 @@ class Container implements ContainerInterface {
      * @throws MissingArgumentException Throws an exception when a required parameter is missing.
      */
     private function resolveArgs(array $defaultArgs, array $args, $instance = null) {
-        $args = array_change_key_case($args);
+        // First resolve all passed arguments so their types are known.
+        $args = array_map(
+            function ($arg) use ($instance) {
+                return $arg instanceof ReferenceInterface ? $arg->resolve($this, $instance) : $arg;
+            },
+            array_change_key_case($args)
+        );
 
         $pos = 0;
         foreach ($defaultArgs as $name => &$default) {
