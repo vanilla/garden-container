@@ -356,4 +356,23 @@ class ContainerTest extends TestBase {
 
         $this->assertFalse($dic->has(self::DB_INTERFACE));
     }
+
+    /**
+     * Test cloning with rules.
+     */
+    public function testCloning() {
+        $dic = $dic = new Container();
+        $dic->rule(self::DB)
+            ->setShared(true);
+
+        $dic2 = clone $dic;
+        $dic2->rule(self::DB)
+            ->setConstructorArgs(['foo']);
+
+        $db1 = $dic->get(self::DB);
+        $db2 = $dic2->get(self::DB);
+
+        $this->assertNotSame($db1, $db2);
+        $this->assertNotSame('foo', $db1->name);
+    }
 }
