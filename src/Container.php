@@ -144,21 +144,25 @@ class Container implements ContainerInterface {
      * Add an alias of the current rule.
      *
      * Setting an alias to the current rule means that getting an item with the alias' name will be like getting the item
-     * with the current rule. If the current rule is shared then the same shared instance will be returned.
+     * with the current rule. If the current rule is shared then the same shared instance will be returned. You can add
+     * multiple aliases by passing additional arguments to this method.
      *
      * If {@link Container::addAlias()} is called with an alias that is the same as the current rule then an **E_USER_NOTICE**
      * level error is raised and the alias is not added.
      *
-     * @param string $alias The alias to set.
+     * @param string ...$alias The alias to set.
      * @return $this
+     * @since 1.4 Added the ability to pass multiple aliases.
      */
-    public function addAlias($alias) {
-        $alias = $this->normalizeID($alias);
+    public function addAlias(...$alias) {
+        foreach ($alias as $name) {
+            $name = $this->normalizeID($name);
 
-        if ($alias === $this->currentRuleName) {
-            trigger_error("Tried to set alias '$alias' to self.", E_USER_NOTICE);
-        } else {
-            $this->rules[$alias]['aliasOf'] = $this->currentRuleName;
+            if ($name === $this->currentRuleName) {
+                trigger_error("Tried to set alias '$name' to self.", E_USER_NOTICE);
+            } else {
+                $this->rules[$name]['aliasOf'] = $this->currentRuleName;
+            }
         }
         return $this;
     }

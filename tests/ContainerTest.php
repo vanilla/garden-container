@@ -277,6 +277,22 @@ class ContainerTest extends TestBase {
     }
 
     /**
+     * Test multiple aliases.
+     */
+    public function testMultipleAliases() {
+        $dic = new Container();
+
+        $aliases = ['foo', 'bar', 'baz'];
+        $dic->rule(Db::class)
+            ->addAlias(...$aliases);
+
+        foreach ($aliases as $alias) {
+            $o = $dic->get($alias);
+            $this->assertInstanceOf(Db::class, $o);
+        }
+    }
+
+    /**
      * An alias to a shared rule should get an instance of the exact same object.
      */
     public function testSharedAlias() {
