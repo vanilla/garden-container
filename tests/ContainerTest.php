@@ -391,4 +391,15 @@ class ContainerTest extends TestBase {
         $this->assertNotSame($db1, $db2);
         $this->assertNotSame('foo', $db1->name);
     }
+
+    /**
+     * Test dumping container instances.
+     */
+    public function testDumping() {
+        $dic = new Container();
+        $dic->get(self::DB);
+
+        $dic->dumpInstances();
+        $this->assertFalse($dic->hasInstance(self::DB));
+    }
 }

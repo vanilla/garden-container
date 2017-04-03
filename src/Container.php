@@ -39,6 +39,14 @@ class Container implements ContainerInterface {
     }
 
     /**
+     * Unset all instances
+     *
+     */
+    public function dumpInstances() {
+        $this->instances = [];
+    }
+
+    /**
      * Deep clone an array.
      *
      * @param array $array The array to clone.
@@ -709,6 +717,19 @@ class Container implements ContainerInterface {
     public function hasRule($id) {
         $id = $this->normalizeID($id);
         return !empty($this->rules[$id]);
+    }
+
+    /**
+     * Returns true if the container already has an instance for the given identifier. Returns false otherwise.
+     *
+     * @param string $id Identifier of the entry to look for.
+     *
+     * @return bool
+     */
+    public function hasInstance($id) {
+        $id = $this->normalizeID($id);
+
+        return isset($this->instances[$id]);
     }
 
     /**
