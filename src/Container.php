@@ -39,10 +39,10 @@ class Container implements ContainerInterface {
     }
 
     /**
-     * Unset all instances
+     * Clear all instances
      *
      */
-    public function dumpInstances() {
+    public function clearInstances() {
         $this->instances = [];
     }
 

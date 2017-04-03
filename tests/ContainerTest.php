@@ -395,11 +395,11 @@ class ContainerTest extends TestBase {
     /**
      * Test dumping container instances.
      */
-    public function testDumping() {
+    public function testClearing() {
         $dic = new Container();
         $dic->get(self::DB);
 
-        $dic->dumpInstances();
+        $dic->clearInstances();
         $this->assertFalse($dic->hasInstance(self::DB));
     }
 }
