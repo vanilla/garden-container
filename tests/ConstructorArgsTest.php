@@ -13,7 +13,7 @@ use Garden\Container\Reference;
 use Garden\Container\Tests\Fixtures\Db;
 use Garden\Container\Tests\Fixtures\Foo;
 use Garden\Container\Tests\Fixtures\FooConsumer;
-use Interop\Container\Exception\ContainerException;
+use Psr\Container\ContainerExceptionInterface;
 
 class ConstructorArgsTest extends AbstractContainerTest {
     /**
@@ -199,7 +199,7 @@ class ConstructorArgsTest extends AbstractContainerTest {
      * Missing constructor parameters should throw an exception that can be understood.
      *
      * @param bool $shared Shared or factory construction.
-     * @expectedException \Interop\Container\Exception\ContainerException
+     * @expectedException \Psr\Container\ContainerExceptionInterface
      * @dataProvider provideShared
      */
     public function testMissingRequiredParams($shared) {

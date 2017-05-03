@@ -7,13 +7,12 @@
 
 namespace Garden\Container;
 
-use Interop\Container\ContainerInterface as InteropContainerInterface;
-use Psr\Container\ContainerInterface as PsrContainerInterface;
+use Psr\Container\ContainerInterface;
 
 /**
  * An inversion of control container.
  */
-class Container implements InteropContainerInterface, PsrContainerInterface {
+class Container implements ContainerInterface {
     private $currentRule;
     private $currentRuleName;
     private $instances;

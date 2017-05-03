@@ -12,6 +12,6 @@ use Psr\Container\NotFoundExceptionInterface;
 /**
  * The exception thrown when an item isn't found in a {@link Container}.
  */
-class NotFoundException extends ContainerException implements \Interop\Container\Exception\NotFoundException, NotFoundExceptionInterface {
+class NotFoundException extends ContainerException implements NotFoundExceptionInterface {
 
 }
