@@ -566,6 +566,27 @@ class Container implements ContainerInterface {
         return $instance;
     }
 
+
+    /**
+     * Find the class implemented by an ID.
+     *
+     * This tries to see if a rule exists for a normalized ID and what class it evaluates to.
+     *
+     * @param string $nid The normalized ID to look up.
+     * @return string|null Returns the name of the class associated with the rule or **null** if one could not be found.
+     */
+    private function findRuleClass($nid) {
+        if (!isset($this->rules[$nid])) {
+            return null;
+        } elseif (!empty($this->rules[$nid]['aliasOf'])) {
+            return $this->findRuleClass($this->rules[$nid]['aliasOf']);
+        } elseif (!empty($this->rules[$nid]['class'])) {
+            return $this->rules[$nid]['class'];
+        }
+
+        return null;
+    }
+
     /**
      * Make an array of default arguments for a given function.
      *
@@ -584,8 +605,15 @@ class Container implements ContainerInterface {
 
             if (array_key_exists($name, $ruleArgs)) {
                 $value = $ruleArgs[$name];
+            } elseif ($param->getClass() && isset($ruleArgs[$pos]) &&
+                // The argument is a reference that matches the type hint.
+                ($ruleArgs[$pos] instanceof Reference && is_a($this->findRuleClass($ruleArgs[$pos]->getName()), $param->getClass()->getName(), true)) ||
+                // The argument is an instance that matches the type hint.
+                (is_object($ruleArgs[$pos]) && is_a($ruleArgs[$pos], $param->getClass()->name))
+            ) {
+                $value = $ruleArgs[$pos];
+                $pos++;
             } elseif ($param->getClass()
-                && !(isset($ruleArgs[$pos]) && is_object($ruleArgs[$pos]) && get_class($ruleArgs[$pos]) === $param->getClass()->name)
                 && ($param->getClass()->isInstantiable() || isset($this->rules[$param->getClass()->name]) || array_key_exists($param->getClass()->name, $this->instances))
             ) {
                 $value = new DefaultReference($this->normalizeID($param->getClass()->name));
