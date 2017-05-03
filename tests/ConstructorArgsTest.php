@@ -15,7 +15,7 @@ use Garden\Container\Tests\Fixtures\Foo;
 use Garden\Container\Tests\Fixtures\FooConsumer;
 use Interop\Container\Exception\ContainerException;
 
-class ConstructorArgsTest extends TestBase {
+class ConstructorArgsTest extends AbstractContainerTest {
     /**
      * Named constructor args should work.
      */

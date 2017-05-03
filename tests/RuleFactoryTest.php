@@ -12,7 +12,7 @@ use Garden\Container\Tests\Fixtures\Db;
 /**
  * Tests for the container's rule factories.
  */
-class RuleFactoryTest extends TestBase {
+class RuleFactoryTest extends AbstractContainerTest {
 
     /**
      * A rule's factory should be called when getting an object.
