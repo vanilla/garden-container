@@ -7,7 +7,7 @@
 
 namespace Garden\Container;
 
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 
 /**
  * An inversion of control container.

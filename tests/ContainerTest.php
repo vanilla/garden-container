@@ -14,7 +14,7 @@ use Garden\Container\Tests\Fixtures\Db;
 use Garden\Container\Tests\Fixtures\Sql;
 use Garden\Container\Tests\Fixtures\Tuple;
 
-class ContainerTest extends TestBase {
+class ContainerTest extends AbstractContainerTest {
     public function testBasicConstruction() {
         $dic = new Container();
         $db = $dic->get(self::DB);

@@ -14,7 +14,7 @@ use Garden\Container\Tests\Fixtures\Db;
 /**
  * Test basic rule access.
  */
-class RuleAccessTest extends TestBase {
+class RuleAccessTest extends AbstractContainerTest {
     /**
      * A new container's default rule should have sensible defaults.
      */

@@ -8,7 +8,7 @@
 namespace Garden\Container\Tests;
 
 
-abstract class TestBase extends \PHPUnit_Framework_TestCase {
+abstract class AbstractContainerTest extends \PHPUnit_Framework_TestCase {
     const DB = 'Garden\Container\Tests\Fixtures\Db';
     const DB_INTERFACE = 'Garden\Container\Tests\Fixtures\DbInterface';
     const DB_DECORATOR = 'Garden\Container\Tests\Fixtures\DbDecorator';

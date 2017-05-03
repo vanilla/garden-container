@@ -7,9 +7,11 @@
 
 namespace Garden\Container;
 
+use Psr\Container\NotFoundExceptionInterface;
+
 /**
  * The exception thrown when an item isn't found in a {@link Container}.
  */
-class NotFoundException extends ContainerException implements \Interop\Container\Exception\NotFoundException {
+class NotFoundException extends ContainerException implements NotFoundExceptionInterface {
 
 }
