@@ -200,10 +200,10 @@ class RuleAccessTest extends AbstractContainerTest {
     public function testSetSameAliasNotice() {
         $dic = new Container();
 
+        $this->expectErrorNumber(E_USER_NOTICE);
+
         $dic->rule('foo')
             ->setAliasOf('foo');
-
-        $this->assertErrorNumber(E_USER_NOTICE);
     }
 
     /**
@@ -212,12 +212,12 @@ class RuleAccessTest extends AbstractContainerTest {
     public function testRemoveDifferentAliasNotice() {
         $dic = new Container();
 
+        $this->expectErrorNumber(E_USER_NOTICE);
         $r = $dic->rule('foo')
             ->addAlias('bar')
             ->rule('baz')
             ->removeAlias('bar');
 
-        $this->assertErrorNumber(E_USER_NOTICE);
         $this->assertSame([], $dic->rule('foo')->getAliases());
         $this->assertSame($dic, $r);
     }
@@ -228,10 +228,10 @@ class RuleAccessTest extends AbstractContainerTest {
     public function testAddSameAliasNotice() {
         $dic = new Container();
 
+        $this->expectErrorNumber(E_USER_NOTICE);
         $r = $dic->rule('foo')
             ->addAlias('foo');
 
-        $this->assertErrorNumber(E_USER_NOTICE);
         $this->assertSame($dic, $r);
     }
 

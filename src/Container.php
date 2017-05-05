@@ -607,9 +607,9 @@ class Container implements ContainerInterface {
                 $value = $ruleArgs[$name];
             } elseif ($param->getClass() && isset($ruleArgs[$pos]) &&
                 // The argument is a reference that matches the type hint.
-                ($ruleArgs[$pos] instanceof Reference && is_a($this->findRuleClass($ruleArgs[$pos]->getName()), $param->getClass()->getName(), true)) ||
+                (($ruleArgs[$pos] instanceof Reference && is_a($this->findRuleClass($ruleArgs[$pos]->getName()), $param->getClass()->getName(), true)) ||
                 // The argument is an instance that matches the type hint.
-                (is_object($ruleArgs[$pos]) && is_a($ruleArgs[$pos], $param->getClass()->name))
+                (is_object($ruleArgs[$pos]) && is_a($ruleArgs[$pos], $param->getClass()->name)))
             ) {
                 $value = $ruleArgs[$pos];
                 $pos++;

@@ -402,4 +402,15 @@ class ContainerTest extends AbstractContainerTest {
         $dic->clearInstances();
         $this->assertFalse($dic->hasInstance(self::DB));
     }
+
+    /**
+     * There was a bug when args aren't specified, but it wasn't caught because tests suppressed notices.
+     */
+    public function testNullArgsBug() {
+        $dic = new Container();
+
+        $sql = new Sql();
+
+        $dic->call([$sql, 'setDb'], []);
+    }
 }
