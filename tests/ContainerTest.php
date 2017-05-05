@@ -14,7 +14,7 @@ use Garden\Container\Tests\Fixtures\Db;
 use Garden\Container\Tests\Fixtures\Sql;
 use Garden\Container\Tests\Fixtures\Tuple;
 
-class ContainerTest extends TestBase {
+class ContainerTest extends AbstractContainerTest {
     public function testBasicConstruction() {
         $dic = new Container();
         $db = $dic->get(self::DB);
@@ -401,5 +401,16 @@ class ContainerTest extends TestBase {
 
         $dic->clearInstances();
         $this->assertFalse($dic->hasInstance(self::DB));
+    }
+
+    /**
+     * There was a bug when args aren't specified, but it wasn't caught because tests suppressed notices.
+     */
+    public function testNullArgsBug() {
+        $dic = new Container();
+
+        $sql = new Sql();
+
+        $dic->call([$sql, 'setDb'], []);
     }
 }

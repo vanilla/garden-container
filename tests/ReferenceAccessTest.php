@@ -12,7 +12,7 @@ use Garden\Container\Container;
 use Garden\Container\DefaultReference;
 use Garden\Container\Reference;
 
-class ReferenceAccessTest extends TestBase {
+class ReferenceAccessTest extends AbstractContainerTest {
 
     public function testCallbackAccess() {
         $f = function () {

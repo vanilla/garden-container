@@ -18,7 +18,7 @@ use Garden\Container\Tests\Fixtures\Sql;
 /**
  * Tests involving reference instantiation.
  */
-class ReferenceTest extends TestBase {
+class ReferenceTest extends AbstractContainerTest {
 
     /**
      * References can take arguments.

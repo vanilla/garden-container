@@ -14,7 +14,7 @@ use Garden\Container\Tests\Fixtures\Db;
 /**
  * Test basic rule access.
  */
-class RuleAccessTest extends TestBase {
+class RuleAccessTest extends AbstractContainerTest {
     /**
      * A new container's default rule should have sensible defaults.
      */
@@ -200,10 +200,10 @@ class RuleAccessTest extends TestBase {
     public function testSetSameAliasNotice() {
         $dic = new Container();
 
+        $this->expectErrorNumber(E_USER_NOTICE);
+
         $dic->rule('foo')
             ->setAliasOf('foo');
-
-        $this->assertErrorNumber(E_USER_NOTICE);
     }
 
     /**
@@ -212,12 +212,12 @@ class RuleAccessTest extends TestBase {
     public function testRemoveDifferentAliasNotice() {
         $dic = new Container();
 
+        $this->expectErrorNumber(E_USER_NOTICE);
         $r = $dic->rule('foo')
             ->addAlias('bar')
             ->rule('baz')
             ->removeAlias('bar');
 
-        $this->assertErrorNumber(E_USER_NOTICE);
         $this->assertSame([], $dic->rule('foo')->getAliases());
         $this->assertSame($dic, $r);
     }
@@ -228,10 +228,10 @@ class RuleAccessTest extends TestBase {
     public function testAddSameAliasNotice() {
         $dic = new Container();
 
+        $this->expectErrorNumber(E_USER_NOTICE);
         $r = $dic->rule('foo')
             ->addAlias('foo');
 
-        $this->assertErrorNumber(E_USER_NOTICE);
         $this->assertSame($dic, $r);
     }
 

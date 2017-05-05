@@ -8,7 +8,7 @@
 namespace Garden\Container\Tests;
 
 
-abstract class TestBase extends \PHPUnit_Framework_TestCase {
+abstract class AbstractContainerTest extends \PHPUnit_Framework_TestCase {
     const DB = 'Garden\Container\Tests\Fixtures\Db';
     const DB_INTERFACE = 'Garden\Container\Tests\Fixtures\DbInterface';
     const DB_DECORATOR = 'Garden\Container\Tests\Fixtures\DbDecorator';
@@ -18,13 +18,13 @@ abstract class TestBase extends \PHPUnit_Framework_TestCase {
     const SQL = 'Garden\Container\Tests\Fixtures\Sql';
     const TUPLE = 'Garden\Container\Tests\Fixtures\Tuple';
 
-    private $errors;
+    private $expectedErrors;
 
     /**
      * Clear out the errors array.
      */
     protected function setUp() {
-        $this->errors = [];
+        $this->expectedErrors = [];
         set_error_handler([$this, "errorHandler"]);
     }
 
@@ -38,7 +38,18 @@ abstract class TestBase extends \PHPUnit_Framework_TestCase {
      * @param mixed $errcontext
      */
     public function errorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
-        $this->errors[] = compact("errno", "errstr", "errfile", "errline", "errcontext");
+        // Look for an expected error.
+        foreach ($this->expectedErrors as $i => $row) {
+            list($no, $str) = $row;
+
+            if (($errno === $no || $no === null) && ($errstr === $str || $str === null)) {
+                unset($this->expectedErrors[$i]);
+                return;
+            }
+        }
+
+        // No error was found so throw an exception.
+        throw new \ErrorException($errstr, $errno, $errno, $errfile, $errline);
     }
 
     /**
@@ -47,17 +58,8 @@ abstract class TestBase extends \PHPUnit_Framework_TestCase {
      * @param string $errstr The desired error string.
      * @param int $errno The desired error number.
      */
-    public function assertError($errstr, $errno) {
-        foreach ($this->errors as $error) {
-            if ($error["errstr"] === $errstr
-                && $error["errno"] === $errno) {
-                return;
-            }
-        }
-        $this->fail(
-            "Error with level $errno and message '$errstr' not found in ",
-            var_export($this->errors, true)
-        );
+    public function expectError($errstr, $errno) {
+        $this->expectedErrors[] = [$errno, $errstr];
     }
 
     /**
@@ -65,22 +67,8 @@ abstract class TestBase extends \PHPUnit_Framework_TestCase {
      *
      * @param int $errno The desired error number.
      */
-    public function assertErrorNumber($errno) {
-        foreach ($this->errors as $error) {
-            if ($error["errno"] === $errno) {
-                return;
-            }
-        }
-
-        $arr = [E_USER_NOTICE => 'E_USER_NOTICE', E_USER_WARNING => 'E_USER_WARNING', E_USER_DEPRECATED => 'E_USER_DEPRECATED'];
-        if (isset($arr[$errno])) {
-            $errno = $arr[$errno];
-        }
-
-        $this->fail(
-            "Error with level $errno not found in ",
-            var_export($this->errors, true)
-        );
+    public function expectErrorNumber($errno) {
+        $this->expectError(null, $errno);
     }
 
     /**
