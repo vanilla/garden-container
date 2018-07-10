@@ -37,7 +37,7 @@ class Model {
 In order to use the controller you'd have to do a fair amount of construction.
 
 ```php
-$controller = new Controller(new Model(new PDO($dsn, $username, $password);
+$controller = new Controller(new Model(new PDO($dsn, $username, $password)));
 ```
 
 You can see how this can get messy when you have to create a lot objects or deep object hierarchies. With a dependency injection container you don't have to do any of that.
