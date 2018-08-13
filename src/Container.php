@@ -226,10 +226,10 @@ class Container implements ContainerInterface {
     /**
      * Set the factory that will be used to create the instance for the current rule.
      *
-     * @param callable $factory This callback will be called to create the instance for the rule.
+     * @param callable|null $factory This callback will be called to create the instance for the rule.
      * @return $this
      */
-    public function setFactory(callable $factory) {
+    public function setFactory(callable $factory = null) {
         $this->currentRule['factory'] = $factory;
         return $this;
     }
@@ -622,6 +622,8 @@ class Container implements ContainerInterface {
                 $pos++;
             } elseif ($param->isDefaultValueAvailable()) {
                 $value = $param->getDefaultValue();
+            } elseif ($param->isOptional()) {
+                $value = null;
             } else {
                 $value = new RequiredParameter($param);
             }
