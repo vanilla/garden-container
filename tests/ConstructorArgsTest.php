@@ -13,6 +13,7 @@ use Garden\Container\Reference;
 use Garden\Container\Tests\Fixtures\Db;
 use Garden\Container\Tests\Fixtures\Foo;
 use Garden\Container\Tests\Fixtures\FooConsumer;
+use Garden\Container\Tests\Fixtures\OptionalConsumer;
 use Psr\Container\ContainerExceptionInterface;
 
 class ConstructorArgsTest extends AbstractContainerTest {
@@ -207,6 +208,20 @@ class ConstructorArgsTest extends AbstractContainerTest {
         $dic->setShared($shared);
 
         $m = $dic->get(FooConsumer::class);
+    }
+
+    /**
+     * Missing constructor parameters for optional values should use the optional value.
+     *
+     * @param bool $shared Shared or factory construction.
+     * @dataProvider provideShared
+     */
+    public function testMissingOptionalParams($shared) {
+        $dic = new Container();
+        $dic->setShared($shared);
+
+        $m = $dic->get(OptionalConsumer::class);
+        $this->assertInstanceOf(OptionalConsumer::class, $m);
     }
 
     /**
