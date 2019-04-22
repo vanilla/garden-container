@@ -8,7 +8,7 @@
 namespace Garden\Container\Tests\Fixtures;
 
 
-class OptionalConsumer {
+class NotFoundOptionalConsumer {
     public $foo;
     public $configValue;
 
