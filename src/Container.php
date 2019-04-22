@@ -594,6 +594,7 @@ class Container implements ContainerInterface {
      * @param array $ruleArgs An array of default arguments specifically for the function.
      * @param array $rule The entire rule.
      * @return array Returns an array in the form `name => defaultValue`.
+     * @throws NotFoundException If a non-optional class param is reflected and does not exist.
      */
     private function makeDefaultArgs(\ReflectionFunctionAbstract $function, array $ruleArgs, array $rule = []) {
         $ruleArgs = array_change_key_case($ruleArgs);
@@ -603,20 +604,35 @@ class Container implements ContainerInterface {
         foreach ($function->getParameters() as $i => $param) {
             $name = strtolower($param->name);
 
+            $reflectedClass = null;
+            try {
+                $reflectedClass = $param->getClass();
+            } catch (\ReflectionException $e) {
+                // If the class is not found in the autoloader a reflection exception is thrown.
+                // Unless the parameter is optional we will want to rethrow.
+                if (!$param->isOptional()) {
+                    throw new NotFoundException(
+                        "Could not find required constructor param $name in the autoloader.",
+                        500,
+                        $e
+                    );
+                }
+            }
+
             if (array_key_exists($name, $ruleArgs)) {
                 $value = $ruleArgs[$name];
-            } elseif ($param->getClass() && isset($ruleArgs[$pos]) &&
+            } elseif ($reflectedClass && isset($ruleArgs[$pos]) &&
                 // The argument is a reference that matches the type hint.
-                (($ruleArgs[$pos] instanceof Reference && is_a($this->findRuleClass($ruleArgs[$pos]->getName()), $param->getClass()->getName(), true)) ||
+                (($ruleArgs[$pos] instanceof Reference && is_a($this->findRuleClass($ruleArgs[$pos]->getName()), $reflectedClass->getName(), true)) ||
                 // The argument is an instance that matches the type hint.
-                (is_object($ruleArgs[$pos]) && is_a($ruleArgs[$pos], $param->getClass()->name)))
+                (is_object($ruleArgs[$pos]) && is_a($ruleArgs[$pos], $reflectedClass->name)))
             ) {
                 $value = $ruleArgs[$pos];
                 $pos++;
-            } elseif ($param->getClass()
-                && ($param->getClass()->isInstantiable() || isset($this->rules[$param->getClass()->name]) || array_key_exists($param->getClass()->name, $this->instances))
+            } elseif ($reflectedClass
+                && ($reflectedClass->isInstantiable() || isset($this->rules[$reflectedClass->name]) || array_key_exists($reflectedClass->name, $this->instances))
             ) {
-                $value = new DefaultReference($this->normalizeID($param->getClass()->name));
+                $value = new DefaultReference($this->normalizeID($reflectedClass->name));
             } elseif (array_key_exists($pos, $ruleArgs)) {
                 $value = $ruleArgs[$pos];
                 $pos++;
