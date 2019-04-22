@@ -44,6 +44,7 @@ class ReferenceTest extends AbstractContainerTest {
         $dic = (new Container())->setShared($shared);
 
         $r = $dic->getArgs(FooConsumer::class, [new Reference(Foo::class)]);
+        $this->assertInstanceOf(FooConsumer::class, $r);
     }
 
     /**
