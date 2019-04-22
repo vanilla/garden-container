@@ -220,8 +220,13 @@ class ConstructorArgsTest extends AbstractContainerTest {
         $dic = new Container();
         $dic->setShared($shared);
 
+        /** @var OptionalConsumer $m */
         $m = $dic->get(OptionalConsumer::class);
         $this->assertInstanceOf(OptionalConsumer::class, $m);
+
+        // These are the default constructor args.
+        $this->assertFalse($m->configValue);
+        $this->assertNull($m->foo);
     }
 
     /**

@@ -10,8 +10,10 @@ namespace Garden\Container\Tests\Fixtures;
 
 class OptionalConsumer {
     public $foo;
+    public $configValue;
 
     public function __construct(SomeNonExistantInterface $foo = null, $configValue = false) {
         $this->foo = $foo;
+        $this->configValue = $configValue;
     }
 }
