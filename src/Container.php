@@ -430,7 +430,7 @@ class Container implements ContainerInterface {
             $function = $this->reflectCallback($callback);
 
             if ($function->getNumberOfParameters() > 0) {
-                $callbackArgs = $this->makeDefaultArgs($function, (array)$rule['constructorArgs'], $rule);
+                $callbackArgs = $this->makeDefaultArgs($function, (array)$rule['constructorArgs']);
                 $factory = function ($args) use ($callback, $callbackArgs) {
                     return call_user_func_array($callback, $this->resolveArgs($callbackArgs, $args));
                 };
@@ -451,7 +451,7 @@ class Container implements ContainerInterface {
             $constructor = $class->getConstructor();
 
             if ($constructor && $constructor->getNumberOfParameters() > 0) {
-                $constructorArgs = $this->makeDefaultArgs($constructor, (array)$rule['constructorArgs'], $rule);
+                $constructorArgs = $this->makeDefaultArgs($constructor, (array)$rule['constructorArgs']);
 
                 $factory = function ($args) use ($className, $constructorArgs) {
                     return new $className(...array_values($this->resolveArgs($constructorArgs, $args)));
@@ -471,7 +471,7 @@ class Container implements ContainerInterface {
             foreach ($rule['calls'] as $call) {
                 list($methodName, $args) = $call;
                 $method = $class->getMethod($methodName);
-                $calls[] = [$methodName, $this->makeDefaultArgs($method, $args, $rule)];
+                $calls[] = [$methodName, $this->makeDefaultArgs($method, $args)];
             }
 
             // Wrap the factory in one that makes the calls.
@@ -511,7 +511,7 @@ class Container implements ContainerInterface {
 
             if ($function->getNumberOfParameters() > 0) {
                 $callbackArgs = $this->resolveArgs(
-                    $this->makeDefaultArgs($function, (array)$rule['constructorArgs'], $rule),
+                    $this->makeDefaultArgs($function, (array)$rule['constructorArgs']),
                     $args
                 );
 
@@ -592,11 +592,10 @@ class Container implements ContainerInterface {
      *
      * @param \ReflectionFunctionAbstract $function The function to make the arguments for.
      * @param array $ruleArgs An array of default arguments specifically for the function.
-     * @param array $rule The entire rule.
      * @return array Returns an array in the form `name => defaultValue`.
      * @throws NotFoundException If a non-optional class param is reflected and does not exist.
      */
-    private function makeDefaultArgs(\ReflectionFunctionAbstract $function, array $ruleArgs, array $rule = []) {
+    private function makeDefaultArgs(\ReflectionFunctionAbstract $function, array $ruleArgs) {
         $ruleArgs = array_change_key_case($ruleArgs);
         $result = [];
 
