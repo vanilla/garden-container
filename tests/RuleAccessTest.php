@@ -204,6 +204,9 @@ class RuleAccessTest extends AbstractContainerTest {
 
         $dic->rule('foo')
             ->setAliasOf('foo');
+
+        // AbstractContainerTest has custom error assertions that aren't actually assertions.
+        $this->assertTrue(true);
     }
 
     /**

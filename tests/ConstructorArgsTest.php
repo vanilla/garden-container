@@ -9,10 +9,13 @@ namespace Garden\Container\Tests;
 
 
 use Garden\Container\Container;
+use Garden\Container\NotFoundException;
 use Garden\Container\Reference;
 use Garden\Container\Tests\Fixtures\Db;
 use Garden\Container\Tests\Fixtures\Foo;
 use Garden\Container\Tests\Fixtures\FooConsumer;
+use Garden\Container\Tests\Fixtures\NotFoundOptionalConsumer;
+use Garden\Container\Tests\Fixtures\NotFoundRequiredConsumer;
 use Psr\Container\ContainerExceptionInterface;
 
 class ConstructorArgsTest extends AbstractContainerTest {
@@ -207,6 +210,41 @@ class ConstructorArgsTest extends AbstractContainerTest {
         $dic->setShared($shared);
 
         $m = $dic->get(FooConsumer::class);
+    }
+
+    /**
+     * A required parameter that could not be found (non-existant class) should throw an exception.
+     *
+     * @param bool $shared Shared or factory construction.
+     * @expectedException \Garden\Container\NotFoundException
+     * @dataProvider provideShared
+     */
+    public function testNotFoundRequiredParams($shared) {
+        $dic = new Container();
+        $dic->setShared($shared);
+
+        /** @var NotFoundOptionalConsumer $m */
+        $m = $dic->get(NotFoundRequiredConsumer::class);
+    }
+
+
+    /**
+     * An optional parameter that could not be found (non-existant class) should use the defaults.
+     *
+     * @param bool $shared Shared or factory construction.
+     * @dataProvider provideShared
+     */
+    public function testNotFoundOptionalParams($shared) {
+        $dic = new Container();
+        $dic->setShared($shared);
+
+        /** @var NotFoundOptionalConsumer $m */
+        $m = $dic->get(NotFoundOptionalConsumer::class);
+        $this->assertInstanceOf(NotFoundOptionalConsumer::class, $m);
+
+        // These are the default constructor args.
+        $this->assertFalse($m->configValue);
+        $this->assertNull($m->foo);
     }
 
     /**

@@ -8,7 +8,9 @@
 namespace Garden\Container\Tests;
 
 
-abstract class AbstractContainerTest extends \PHPUnit_Framework_TestCase {
+use PHPUnit\Framework\TestCase;
+
+abstract class AbstractContainerTest extends TestCase {
     const DB = 'Garden\Container\Tests\Fixtures\Db';
     const DB_INTERFACE = 'Garden\Container\Tests\Fixtures\DbInterface';
     const DB_DECORATOR = 'Garden\Container\Tests\Fixtures\DbDecorator';

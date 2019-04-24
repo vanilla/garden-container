@@ -408,9 +408,10 @@ class ContainerTest extends AbstractContainerTest {
      */
     public function testNullArgsBug() {
         $dic = new Container();
-
         $sql = new Sql();
 
         $dic->call([$sql, 'setDb'], []);
+        // Assert that no exception were thrown.
+        $this->assertTrue(true);
     }
 }
