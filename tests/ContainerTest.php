@@ -10,6 +10,9 @@ namespace Garden\Container\Tests;
 use Garden\Container\Callback;
 use Garden\Container\Container;
 use Garden\Container\Reference;
+use Garden\Container\Tests\Fixtures\CircleA;
+use Garden\Container\Tests\Fixtures\CircleB;
+use Garden\Container\Tests\Fixtures\CircleC;
 use Garden\Container\Tests\Fixtures\Db;
 use Garden\Container\Tests\Fixtures\Sql;
 use Garden\Container\Tests\Fixtures\Tuple;
@@ -413,5 +416,33 @@ class ContainerTest extends AbstractContainerTest {
         $dic->call([$sql, 'setDb'], []);
         // Assert that no exception were thrown.
         $this->assertTrue(true);
+    }
+
+    /**
+     * Test circular references on shared objects.
+     *
+     * @param string $id The ID to get from the container.
+     * @dataProvider provideCircularIDs
+     */
+    public function testCircularReference($id) {
+        $dic = new Container();
+        $dic->setShared(true);
+
+        $o = $dic->get($id);
+        $this->assertInstanceOf($id, $o);
+        $this->assertSame($o, $o->ref->ref->ref);
+    }
+
+    /**
+     * Provide test data for {@link testCircularReference()}.
+     *
+     * @return array Returns a data provider array.
+     */
+    public function provideCircularIDs() {
+        return [
+            'a' => [CircleA::class],
+            'b' => [CircleB::class],
+            'c' => [CircleC::class]
+        ];
     }
 }
