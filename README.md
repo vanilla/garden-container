@@ -1,6 +1,6 @@
 # Garden Container
 
-[![Build Status](https://img.shields.io/travis/vanilla/garden-container.svg?style=flat)](https://travis-ci.org/vanilla/garden-container)
+[![Build Status](https://img.shields.io/travis/vanilla/garden-container.svg?style=flat)](https://travis-ci.com/vanilla/garden-container)
 [![Coverage](https://img.shields.io/scrutinizer/coverage/g/vanilla/garden-container.svg?style=flat)](https://scrutinizer-ci.com/g/vanilla/garden-container/)
 [![Packagist Version](https://img.shields.io/packagist/v/vanilla/garden-container.svg?style=flat)](https://packagist.org/packages/vanilla/garden-container)
 ![MIT License](https://img.shields.io/packagist/l/vanilla/garden-container.svg?style=flat)
