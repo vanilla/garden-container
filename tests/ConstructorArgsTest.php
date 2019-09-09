@@ -12,6 +12,7 @@ use Garden\Container\Container;
 use Garden\Container\NotFoundException;
 use Garden\Container\Reference;
 use Garden\Container\Tests\Fixtures\Db;
+use Garden\Container\Tests\Fixtures\ExtendedPdoDb;
 use Garden\Container\Tests\Fixtures\Foo;
 use Garden\Container\Tests\Fixtures\FooConsumer;
 use Garden\Container\Tests\Fixtures\NotFoundOptionalConsumer;
@@ -61,6 +62,45 @@ class ConstructorArgsTest extends AbstractContainerTest {
         /** @var Db $db */
         $db = $c->get(self::PDODB);
         $this->assertNotSame('foo', $db->name);
+    }
+
+    /**
+     * Make sure inherit rules are checked through implmenting interfaces.
+     */
+    public function testDeepInheritRulesThroughInterface() {
+        $c = new Container();
+
+        $c
+            ->rule(self::DB)
+            ->setInherit(true)
+            ->setConstructorArgs(['db'])
+            ->rule(self::PDODB)
+            ->setInherit(false)
+            ->setConstructorArgs(['pdodb']);
+
+        /** @var Db $db */
+        $db = $c->get(ExtendedPdoDb::class);
+        $this->assertSame('db', $db->name);
+    }
+
+
+    /**
+     * Make sure inherit rules are checked through inherited classes.
+     */
+    public function testDeepInheritRulesThroughClass() {
+        $c = new Container();
+
+        $c
+            ->rule(self::DB_INTERFACE)
+            ->setInherit(true)
+            ->setConstructorArgs(['interface'])
+            ->rule(self::DB)
+            ->setInherit(false)
+            ->setConstructorArgs(['db']);
+
+        /** @var Db $db */
+        $db = $c->get(self::PDODB);
+        $this->assertSame('interface', $db->name);
     }
 
     /**
