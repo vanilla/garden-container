@@ -369,7 +369,7 @@ class Container implements ContainerInterface {
             for ($class = get_parent_class($nid); !empty($class); $class = get_parent_class($class)) {
                 // Don't add the rule if it doesn't say to inherit.
                 if (!isset($this->rules[$class]) || (isset($this->rules[$class]['inherit']) && !$this->rules[$class]['inherit'])) {
-                    break;
+                    continue;
                 }
                 $rule += $this->rules[$class];
             }
