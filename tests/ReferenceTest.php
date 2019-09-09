@@ -27,7 +27,7 @@ class ReferenceTest extends AbstractContainerTest {
         $dic = new Container();
 
         $dic->rule(Model::class)
-            ->setConstructorArgs(['sql' => new Reference(Sql::class, ['baz'])]);
+            ->setConstructorArgs(['sql' => $this->makeBazSql()]);
 
         /* @var Model $model */
         $model = $dic->get(Model::class);
@@ -107,5 +107,51 @@ class ReferenceTest extends AbstractContainerTest {
 
         $r = $dic->getArgs(FooConsumer::class, [new Reference('baz')]);
         $this->assertSame($dic->get('baz'), $r->foo);
+    }
+
+    /**
+     * Make a sql reference with name 'not-baz'.
+     */
+    private function makeNotBazSql(): Reference {
+        return new Reference(Sql::class, ['not-baz']);
+    }
+
+    /**
+     * Make a sql reference with name 'baz'.
+     */
+    private function makeBazSql(): Reference {
+        return new Reference(Sql::class, ['baz']);
+    }
+
+    /**
+     * References can be passed as a named argument in an `addCall()` rule.
+     */
+    public function testReferencePassAsCallArgument() {
+        $dic = new Container();
+
+        $dic->rule(Model::class)
+            ->setConstructorArgs(['sql' => $this->makeNotBazSql()])
+            ->addCall('setSql', ['sql' => $this->makeBazSql()]);
+        ;
+
+        /* @var Model $model */
+        $model = $dic->get(Model::class);
+        $this->assertSame('baz', $model->sql->name);
+    }
+
+    /**
+     * References can be passed to as ordinal argument in an `addCall()` rule.
+     */
+    public function testReferencePassAsOrdinalCallArgument() {
+        $dic = new Container();
+
+        $dic->rule(Model::class)
+            ->setConstructorArgs(['sql' => $this->makeNotBazSql()])
+            ->addCall('setSql', [$this->makeBazSql()])
+        ;
+
+        /* @var Model $model */
+        $model = $dic->get(Model::class);
+        $this->assertSame('baz', $model->sql->name);
     }
 }

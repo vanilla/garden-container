@@ -14,4 +14,8 @@ class Model {
     public function __construct(Sql $sql) {
         $this->sql = $sql;
     }
+
+    public function setSql(Sql $sql) {
+        $this->sql = $sql;
+    }
 }
