@@ -628,13 +628,13 @@ class Container implements ContainerInterface {
             ) {
                 $value = $ruleArgs[$pos];
                 $pos++;
+            } elseif (array_key_exists($pos, $ruleArgs)) {
+                $value = $ruleArgs[$pos];
+                $pos++;
             } elseif ($reflectedClass
                 && ($reflectedClass->isInstantiable() || isset($this->rules[$reflectedClass->name]) || array_key_exists($reflectedClass->name, $this->instances))
             ) {
                 $value = new DefaultReference($this->normalizeID($reflectedClass->name));
-            } elseif (array_key_exists($pos, $ruleArgs)) {
-                $value = $ruleArgs[$pos];
-                $pos++;
             } elseif ($param->isDefaultValueAvailable()) {
                 $value = $param->getDefaultValue();
             } elseif ($param->isOptional()) {
