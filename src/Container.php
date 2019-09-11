@@ -641,7 +641,7 @@ class Container implements ContainerInterface {
                     );
                 } elseif (is_object($ordinalRule)) {
                     // The argument is an instance that matches the type hint.
-                    $isMatchingOrdinalInstance = is_a($ordinalRule, $reflectedClass->name);
+                    $isMatchingOrdinalInstance = is_a($ordinalRule, $reflectedClass->getName());
                 }
             }
 
