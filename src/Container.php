@@ -469,7 +469,7 @@ class Container implements ContainerInterface {
 
             // Generate the calls array.
             foreach ($rule['calls'] as $call) {
-                list($methodName, $args) = $call;
+                [$methodName, $args] = $call;
                 $method = $class->getMethod($methodName);
                 $calls[] = [$methodName, $this->makeDefaultArgs($method, $args)];
             }
@@ -479,9 +479,11 @@ class Container implements ContainerInterface {
                 $instance = $factory($args);
 
                 foreach ($calls as $call) {
+                    [$methodName, $defaultArgs] = $call;
+                    $finalArgs = $this->resolveArgs($defaultArgs, [], $instance);
                     call_user_func_array(
-                        [$instance, $call[0]],
-                        $this->resolveArgs($call[1], [], $instance)
+                        [$instance, $methodName],
+                        $finalArgs
                     );
                 }
 
@@ -618,13 +620,37 @@ class Container implements ContainerInterface {
                 }
             }
 
+            $hasOrdinalRule = isset($ruleArgs[$pos]);
+
+            $isMatchingOrdinalReference = false;
+            $isMatchingOrdinalInstance = false;
+            if ($hasOrdinalRule && $reflectedClass) {
+                $ordinalRule = $ruleArgs[$pos];
+
+                if ($ordinalRule instanceof Reference) {
+                    $ruleClass = $ordinalRule->getName();
+                    if (($resolvedRuleClass = $this->findRuleClass($ruleClass)) !== null) {
+                        $ruleClass = $resolvedRuleClass;
+                    }
+
+                    // The argument is a reference that matches the type hint.
+                    $isMatchingOrdinalReference = is_a(
+                        $ruleClass,
+                        $reflectedClass->getName(),
+                        true
+                    );
+                } elseif (is_object($ordinalRule)) {
+                    // The argument is an instance that matches the type hint.
+                    $isMatchingOrdinalInstance = is_a($ordinalRule, $reflectedClass->getName());
+                }
+            }
+
             if (array_key_exists($name, $ruleArgs)) {
                 $value = $ruleArgs[$name];
-            } elseif ($reflectedClass && isset($ruleArgs[$pos]) &&
-                // The argument is a reference that matches the type hint.
-                (($ruleArgs[$pos] instanceof Reference && is_a($this->findRuleClass($ruleArgs[$pos]->getName()), $reflectedClass->getName(), true)) ||
-                // The argument is an instance that matches the type hint.
-                (is_object($ruleArgs[$pos]) && is_a($ruleArgs[$pos], $reflectedClass->name)))
+            } elseif (
+                $reflectedClass
+                && $hasOrdinalRule
+                && ($isMatchingOrdinalReference|| $isMatchingOrdinalInstance)
             ) {
                 $value = $ruleArgs[$pos];
                 $pos++;
@@ -632,7 +658,7 @@ class Container implements ContainerInterface {
                 && ($reflectedClass->isInstantiable() || isset($this->rules[$reflectedClass->name]) || array_key_exists($reflectedClass->name, $this->instances))
             ) {
                 $value = new DefaultReference($this->normalizeID($reflectedClass->name));
-            } elseif (array_key_exists($pos, $ruleArgs)) {
+            } elseif ($hasOrdinalRule) {
                 $value = $ruleArgs[$pos];
                 $pos++;
             } elseif ($param->isDefaultValueAvailable()) {
