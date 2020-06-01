@@ -57,7 +57,7 @@ class Reference implements ReferenceInterface {
         if (empty($this->name)) {
             return null;
         } elseif (is_string($this->name)) {
-            return $container->getArgs($this->name, $this->args);
+            return $container->getArgs($this->name, $this->getArgs());
         } else {
             $result = $container;
             foreach ($this->name as $name) {

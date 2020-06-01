@@ -7,71 +7,23 @@
 
 namespace Garden\Container\Tests;
 
-
+use Garden\Container\Tests\Fixtures\Db;
+use Garden\Container\Tests\Fixtures\DbDecorator;
+use Garden\Container\Tests\Fixtures\DbInterface;
+use Garden\Container\Tests\Fixtures\Foo;
+use Garden\Container\Tests\Fixtures\FooAwareInterface;
+use Garden\Container\Tests\Fixtures\PdoDb;
+use Garden\Container\Tests\Fixtures\Sql;
 use PHPUnit\Framework\TestCase;
 
 abstract class AbstractContainerTest extends TestCase {
-    const DB = 'Garden\Container\Tests\Fixtures\Db';
-    const DB_INTERFACE = 'Garden\Container\Tests\Fixtures\DbInterface';
-    const DB_DECORATOR = 'Garden\Container\Tests\Fixtures\DbDecorator';
-    const FOO = 'Garden\Container\Tests\Fixtures\Foo';
-    const FOO_AWARE = 'Garden\Container\Tests\Fixtures\FooAwareInterface';
-    const PDODB = 'Garden\Container\Tests\Fixtures\PdoDb';
-    const SQL = 'Garden\Container\Tests\Fixtures\Sql';
-    const TUPLE = 'Garden\Container\Tests\Fixtures\Tuple';
-
-    private $expectedErrors;
-
-    /**
-     * Clear out the errors array.
-     */
-    protected function setUp() {
-        $this->expectedErrors = [];
-        set_error_handler([$this, "errorHandler"]);
-    }
-
-    /**
-     * Track errors that occur during testing.
-     *
-     * @param int $errno
-     * @param string $errstr
-     * @param string $errfile
-     * @param int $errline
-     * @param mixed $errcontext
-     */
-    public function errorHandler($errno, $errstr, $errfile, $errline, $errcontext) {
-        // Look for an expected error.
-        foreach ($this->expectedErrors as $i => $row) {
-            list($no, $str) = $row;
-
-            if (($errno === $no || $no === null) && ($errstr === $str || $str === null)) {
-                unset($this->expectedErrors[$i]);
-                return;
-            }
-        }
-
-        // No error was found so throw an exception.
-        throw new \ErrorException($errstr, $errno, $errno, $errfile, $errline);
-    }
-
-    /**
-     * Assert than an error has occurred.
-     *
-     * @param string $errstr The desired error string.
-     * @param int $errno The desired error number.
-     */
-    public function expectError($errstr, $errno) {
-        $this->expectedErrors[] = [$errno, $errstr];
-    }
-
-    /**
-     * Assert than an error has occurred.
-     *
-     * @param int $errno The desired error number.
-     */
-    public function expectErrorNumber($errno) {
-        $this->expectError(null, $errno);
-    }
+    const DB = Db::class;
+    const DB_INTERFACE = DbInterface::class;
+    const DB_DECORATOR = DbDecorator::class;
+    const FOO = Foo::class;
+    const FOO_AWARE = FooAwareInterface::class;
+    const PDODB = PdoDb::class;
+    const SQL = Sql::class;
 
     /**
      * Provide values for tests that are configured for shared and non shared.
@@ -81,7 +33,7 @@ abstract class AbstractContainerTest extends TestCase {
     public function provideShared() {
         return [
             'notShared' => [false],
-            'shared' => [true]
+            'shared' => [true],
         ];
     }
 }

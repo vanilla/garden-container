@@ -536,14 +536,19 @@ class Container implements ContainerInterface {
             $constructor = $class->getConstructor();
 
             if ($constructor && $constructor->getNumberOfParameters() > 0) {
-                // Instantiate the object first so that this instance can be used for cyclic dependencies.
-                $this->instances[$nid] = $instance = $class->newInstanceWithoutConstructor();
+                try {
+                    // Instantiate the object first so that this instance can be used for cyclic dependencies.
+                    $this->instances[$nid] = $instance = $class->newInstanceWithoutConstructor();
 
-                $constructorArgs = $this->resolveArgs(
-                    $this->makeDefaultArgs($constructor, (array)$rule['constructorArgs'], $rule),
-                    $args
-                );
-                $constructor->invokeArgs($instance, $constructorArgs);
+                    $constructorArgs = $this->resolveArgs(
+                        $this->makeDefaultArgs($constructor, (array)$rule['constructorArgs'], $rule),
+                        $args
+                    );
+                    $constructor->invokeArgs($instance, $constructorArgs);
+                } catch (\Throwable $ex) {
+                    unset($this->instances[$nid]);
+                    throw $ex;
+                }
             } else {
                 $this->instances[$nid] = $instance = new $class->name;
             }
@@ -664,7 +669,9 @@ class Container implements ContainerInterface {
             } elseif ($param->isDefaultValueAvailable()) {
                 $value = $param->getDefaultValue();
             } elseif ($param->isOptional()) {
+                // @codeCoverageIgnoreStart
                 $value = null;
+                // @codeCoverageIgnoreEnd
             } else {
                 $value = new RequiredParameter($param);
             }

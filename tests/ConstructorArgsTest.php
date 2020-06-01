@@ -242,10 +242,10 @@ class ConstructorArgsTest extends AbstractContainerTest {
      * Missing constructor parameters should throw an exception that can be understood.
      *
      * @param bool $shared Shared or factory construction.
-     * @expectedException \Psr\Container\ContainerExceptionInterface
      * @dataProvider provideShared
      */
     public function testMissingRequiredParams($shared) {
+        $this->expectException(ContainerExceptionInterface::class);
         $dic = new Container();
         $dic->setShared($shared);
 
@@ -256,13 +256,13 @@ class ConstructorArgsTest extends AbstractContainerTest {
      * A required parameter that could not be found (non-existant class) should throw an exception.
      *
      * @param bool $shared Shared or factory construction.
-     * @expectedException \Garden\Container\NotFoundException
      * @dataProvider provideShared
      */
     public function testNotFoundRequiredParams($shared) {
         $dic = new Container();
         $dic->setShared($shared);
 
+        $this->expectException(NotFoundException::class);
         /** @var NotFoundOptionalConsumer $m */
         $m = $dic->get(NotFoundRequiredConsumer::class);
     }

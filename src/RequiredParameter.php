@@ -53,6 +53,6 @@ class RequiredParameter extends DefaultReference {
      * @throws MissingArgumentException Always throws an exception.
      */
     public function resolve(Container $container, $_ = null) {
-        throw new MissingArgumentException($this->parameter, $this->function);
+        throw new MissingArgumentException($this->getParameter(), $this->getFunction());
     }
 }
