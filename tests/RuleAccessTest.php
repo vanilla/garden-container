@@ -199,11 +199,10 @@ class RuleAccessTest extends AbstractContainerTest {
      */
     public function testSetSameAliasNotice() {
         $dic = new Container();
+        $dic->rule('foo');
 
-        $this->expectErrorNumber(E_USER_NOTICE);
-
-        $dic->rule('foo')
-            ->setAliasOf('foo');
+        $this->expectNotice();
+        $dic->setAliasOf('foo');
 
         // AbstractContainerTest has custom error assertions that aren't actually assertions.
         $this->assertTrue(true);
@@ -215,7 +214,7 @@ class RuleAccessTest extends AbstractContainerTest {
     public function testRemoveDifferentAliasNotice() {
         $dic = new Container();
 
-        $this->expectErrorNumber(E_USER_NOTICE);
+        $this->expectNotice();
         $r = $dic->rule('foo')
             ->addAlias('bar')
             ->rule('baz')
@@ -231,7 +230,7 @@ class RuleAccessTest extends AbstractContainerTest {
     public function testAddSameAliasNotice() {
         $dic = new Container();
 
-        $this->expectErrorNumber(E_USER_NOTICE);
+        $this->expectNotice();
         $r = $dic->rule('foo')
             ->addAlias('foo');
 

@@ -9,13 +9,16 @@ namespace Garden\Container\Tests;
 
 use Garden\Container\Callback;
 use Garden\Container\Container;
+use Garden\Container\NotFoundException;
 use Garden\Container\Reference;
+use Garden\Container\Tests\Fixtures\Bad;
 use Garden\Container\Tests\Fixtures\CircleA;
 use Garden\Container\Tests\Fixtures\CircleB;
 use Garden\Container\Tests\Fixtures\CircleC;
 use Garden\Container\Tests\Fixtures\Db;
 use Garden\Container\Tests\Fixtures\Sql;
 use Garden\Container\Tests\Fixtures\Tuple;
+use Foo\NotFound;
 
 class ContainerTest extends AbstractContainerTest {
     public function testBasicConstruction() {
@@ -90,12 +93,12 @@ class ContainerTest extends AbstractContainerTest {
     public function testCalls($shared) {
         $dic = new Container();
 
-        $dic->rule(self::TUPLE)
+        $dic->rule(Tuple::class)
             ->setShared($shared)
             ->setConstructorArgs(['a', 'b'])
             ->addCall('setA', ['foo']);
 
-        $t = $dic->get(self::TUPLE);
+        $t = $dic->get(Tuple::class);
         $this->assertSame('foo', $t->a);
         $this->assertSame('b', $t->b);
     }
@@ -188,11 +191,11 @@ class ContainerTest extends AbstractContainerTest {
      *
      * @param bool $shared Set the container to shared or not.
      * @dataProvider provideShared
-     * @expectedException \Garden\Container\NotFoundException
      */
     public function testNotFoundException($shared) {
         $dic = new Container();
 
+        $this->expectException(NotFoundException::class);
         $dic->setShared($shared)
             ->get('adsf');
     }
@@ -260,7 +263,7 @@ class ContainerTest extends AbstractContainerTest {
         /**
          * @var Tuple $tuple
          */
-        $tuple = $dic->getArgs(self::TUPLE, [$cb, $cb]);
+        $tuple = $dic->getArgs(Tuple::class, [$cb, $cb]);
 
         $this->assertSame(1, $tuple->a);
         $this->assertSame(2, $tuple->b);
@@ -444,5 +447,20 @@ class ContainerTest extends AbstractContainerTest {
             'b' => [CircleB::class],
             'c' => [CircleC::class]
         ];
+    }
+
+    public function testContainerCorruption() {
+        $dic = new Container();
+        $dic->setShared(true);
+        $dic->rule(Tuple::class)
+            ->setConstructorArgs(['a' => 'a', 'b' => new Reference(NotFound::class)]);
+
+        try {
+            $tuple = $dic->get(Tuple::class);
+            $this->fail("This test is supposed to throw an exception!");
+        } catch (\Exception $ex) {
+            $this->assertFalse($dic->hasInstance(Tuple::class));
+            return;
+        }
     }
 }
