@@ -319,6 +319,11 @@ class Container implements ContainerInterface {
     public function addCall($method, array $args = []) {
         $this->currentRule['calls'][] = [$method, $args];
 
+        // Something added a rule. If we have any existing factories make sure we clear them.
+        if (isset($this->factories[$this->currentRuleName])) {
+            unset($this->factories[$this->currentRuleName]);
+        }
+
         return $this;
     }
 
