@@ -8,6 +8,7 @@
 namespace Garden\Container\Tests;
 use Garden\Container\Container;
 use Garden\Container\Tests\Fixtures\Db;
+use Garden\Container\Tests\Fixtures\Foo;
 
 /**
  * Tests for the container's rule factories.
@@ -144,5 +145,30 @@ class RuleFactoryTest extends AbstractContainerTest {
         $foo = $dic->get(self::FOO);
         $this->assertSame('foo', $foo->foo);
         $this->assertSame('bar', $foo->bar);
+    }
+
+    /**
+     * Test that the a factory cache is cleared after a rule change.
+     */
+    public function testCacheClearOnRule() {
+        $dic = new Container();
+
+        $dic
+            ->rule(Foo::class)
+            ->setShared(false)
+            ->addCall('setFoo', ['foo1'])
+            ->addCall('setFoo', ['foo2'])
+        ;
+
+        /** @var Foo $foo */
+        $foo = $dic->get(Foo::class);
+        $this->assertEquals('foo2', $foo->foo);
+
+        $dic->rule(Foo::class)
+            ->addCall('setFoo', ['foo3']);
+
+        /** @var Foo $foo */
+        $foo = $dic->get(Foo::class);
+        $this->assertEquals('foo3', $foo->foo);
     }
 }
