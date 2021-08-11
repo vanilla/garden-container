@@ -330,13 +330,14 @@ class Container implements ContainerInterface {
     /**
      * Finds an entry of the container by its identifier and returns it.
      *
-     * @param string $id Identifier of the entry to look for.
+     * @template T
+     * @param class-string<T>|string $id Identifier of the entry to look for.
      * @param array $args Additional arguments to pass to the constructor.
      *
      * @throws NotFoundException No entry was found for this identifier.
      * @throws ContainerException Error while retrieving the entry.
      *
-     * @return mixed Entry.
+     * @return T|mixed Entry.
      */
     public function getArgs($id, array $args = []) {
         $id = $this->normalizeID($id);
@@ -562,7 +563,7 @@ class Container implements ContainerInterface {
         // Call subsequent calls on the new object.
         if (isset($class) && !empty($rule['calls'])) {
             foreach ($rule['calls'] as $call) {
-                list($methodName, $args) = $call;
+                [$methodName, $args] = $call;
                 $method = $class->getMethod($methodName);
 
                 $args = $this->resolveArgs(
@@ -818,12 +819,13 @@ class Container implements ContainerInterface {
     /**
      * Finds an entry of the container by its identifier and returns it.
      *
-     * @param string $id Identifier of the entry to look for.
+     * @template T
+     * @param class-string<T>|string $id Identifier of the entry to look for.
      *
      * @throws NotFoundException  No entry was found for this identifier.
      * @throws ContainerException Error while retrieving the entry.
      *
-     * @return mixed Entry.
+     * @return T|mixed Entry.
      */
     public function get($id) {
         return $this->getArgs($id);
