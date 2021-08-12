@@ -57,9 +57,6 @@ workflows:
   commit:
     jobs:
       - php_setup
-      - php_71_tests:
-          requires:
-            - php_setup
       - php_72_tests:
           requires:
             - php_setup
