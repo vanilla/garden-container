@@ -424,7 +424,7 @@ class Container implements ContainerInterface {
      *
      * @param string $nid The normalized ID of the container item.
      * @param array $rule The resolved rule for the ID.
-     * @return \Closure Returns a function that when called will create a new instance of the class.
+     * @return callable Returns a function that when called will create a new instance of the class.
      * @throws NotFoundException No entry was found for this identifier.
      */
     private function makeFactory($nid, array $rule) {
@@ -482,6 +482,9 @@ class Container implements ContainerInterface {
 
             // Wrap the factory in one that makes the calls.
             $factory = function ($args) use ($factory, $calls) {
+                /**
+                 * @psalm-suppress TooManyArguments
+                 */
                 $instance = $factory($args);
 
                 foreach ($calls as $call) {
@@ -547,7 +550,7 @@ class Container implements ContainerInterface {
                     $this->instances[$nid] = $instance = $class->newInstanceWithoutConstructor();
 
                     $constructorArgs = $this->resolveArgs(
-                        $this->makeDefaultArgs($constructor, (array)$rule['constructorArgs'], $rule),
+                        $this->makeDefaultArgs($constructor, (array)$rule['constructorArgs']),
                         $args
                     );
                     $constructor->invokeArgs($instance, $constructorArgs);
@@ -567,11 +570,14 @@ class Container implements ContainerInterface {
                 $method = $class->getMethod($methodName);
 
                 $args = $this->resolveArgs(
-                    $this->makeDefaultArgs($method, $args, $rule),
+                    $this->makeDefaultArgs($method, $args),
                     [],
                     $instance
                 );
 
+                /**
+                 * @psalm-suppress UndefinedMethod
+                 */
                 $method->invokeArgs($instance, $args);
             }
         }
@@ -640,6 +646,10 @@ class Container implements ContainerInterface {
 
                 if ($ordinalRule instanceof Reference) {
                     $ruleClass = $ordinalRule->getName();
+                    if (is_array($ruleClass)) {
+                        $ruleClass = end($ruleClass);
+                    }
+
                     if (($resolvedRuleClass = $this->findRuleClass($ruleClass)) !== null) {
                         $ruleClass = $resolvedRuleClass;
                     }
@@ -770,10 +780,11 @@ class Container implements ContainerInterface {
             if (is_object($callback[0])) {
                 $instance = $callback[0];
             }
-        } else {
+        } elseif (is_string($callback) || $callback instanceof \Closure) {
             $function = new \ReflectionFunction($callback);
+        } else {
+            $function = new \ReflectionMethod($callback, '__invoke');
         }
-
         $args = $this->resolveArgs($this->makeDefaultArgs($function, $args), [], $instance);
 
         return call_user_func_array($callback, $args);
@@ -840,8 +851,10 @@ class Container implements ContainerInterface {
     private function reflectCallback(callable $callback) {
         if (is_array($callback)) {
             return new \ReflectionMethod($callback[0], $callback[1]);
-        } else {
+        } elseif (is_string($callback) || $callback instanceof \Closure) {
             return new \ReflectionFunction($callback);
+        } else {
+            return new \ReflectionMethod($callback, '__invoke');
         }
     }
 }
