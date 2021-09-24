@@ -629,8 +629,11 @@ class Container implements ContainerInterface {
                 // If the class is not found in the autoloader a reflection exception is thrown.
                 // Unless the parameter is optional we will want to rethrow.
                 if (!$param->isOptional()) {
+                    $typeName = self::parameterTypeName($param);
+                    $functionName = self::functionName($function);
+
                     throw new NotFoundException(
-                        "Could not find required constructor param $name in the autoloader.",
+                        "Could not find class for required parameter $typeName for $functionName in the autoloader.",
                         500,
                         $e
                     );
@@ -856,5 +859,36 @@ class Container implements ContainerInterface {
         } else {
             return new \ReflectionMethod($callback, '__invoke');
         }
+    }
+
+
+    /**
+     * Return the name of a function to aid debugging.
+     *
+     * @param \ReflectionFunctionAbstract $function
+     * @return string
+     */
+    protected static function functionName(\ReflectionFunctionAbstract $function): string {
+        $functionName = $function->getName() . '()';
+        if ($function instanceof \ReflectionMethod) {
+            $functionName = $function->getDeclaringClass()->getName() . '::' . $functionName;
+        }
+        return $functionName;
+    }
+
+    /**
+     * Return the type name of a parameter to aid debugging.
+     *
+     * @param \ReflectionParameter $param
+     * @return string
+     */
+    protected static function parameterTypeName(\ReflectionParameter $param): string {
+        $type = $param->getType();
+        if ($type instanceof \ReflectionNamedType) {
+            $name = $type->getName();
+        } else {
+            $name = $param->getName();
+        }
+        return $name;
     }
 }
