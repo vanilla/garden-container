@@ -1,11 +1,16 @@
 <?php
-
-namespace Garden\Container;
-
 /**
  * @author Adam Charron <adam@charrondev.com>
  * @copyright 2009-2021 Vanilla Forums Inc.
  * @license MIT
+ */
+
+namespace Garden\Container;
+
+/**
+ * Interface representing configuration of a container.
+ *
+ * No methods for instantiation are provided.
  */
 interface ContainerConfigurationInterface {
 
