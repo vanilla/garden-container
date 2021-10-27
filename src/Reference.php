@@ -53,7 +53,7 @@ class Reference implements ReferenceInterface {
     /**
      * {@inheritdoc}
      */
-    public function resolve(Container $container, $_ = null) {
+    public function resolve(Container $container, $instance = null) {
         if (empty($this->name)) {
             return null;
         } elseif (is_string($this->name)) {

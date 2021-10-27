@@ -263,6 +263,7 @@ class ConstructorArgsTest extends AbstractContainerTest {
         $dic->setShared($shared);
 
         $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage('Could not find class for required parameter');
         /** @var NotFoundOptionalConsumer $m */
         $m = $dic->get(NotFoundRequiredConsumer::class);
     }

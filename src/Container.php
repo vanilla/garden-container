@@ -250,13 +250,14 @@ class Container implements ContainerInterface, ContainerConfiguration {
     /**
      * Finds an entry of the container by its identifier and returns it.
      *
-     * @param string $id Identifier of the entry to look for.
+     * @template T
+     * @param class-string<T>|string $id Identifier of the entry to look for.
      * @param array $args Additional arguments to pass to the constructor.
      *
      * @throws NotFoundException No entry was found for this identifier.
      * @throws ContainerException Error while retrieving the entry.
      *
-     * @return mixed Entry.
+     * @return T|mixed Entry.
      */
     public function getArgs($id, array $args = []) {
         $id = $this->normalizeID($id);
@@ -336,12 +337,13 @@ class Container implements ContainerInterface, ContainerConfiguration {
     /**
      * Finds an entry of the container by its identifier and returns it.
      *
-     * @param string $id Identifier of the entry to look for.
+     * @template T
+     * @param class-string<T>|string $id Identifier of the entry to look for.
      *
      * @throws NotFoundException  No entry was found for this identifier.
      * @throws ContainerException Error while retrieving the entry.
      *
-     * @return mixed Entry.
+     * @return T|mixed Entry.
      */
     public function get($id) {
         return $this->getArgs($id);
@@ -442,7 +444,7 @@ class Container implements ContainerInterface, ContainerConfiguration {
      *
      * @param string $nid The normalized ID of the container item.
      * @param array $rule The resolved rule for the ID.
-     * @return \Closure Returns a function that when called will create a new instance of the class.
+     * @return callable Returns a function that when called will create a new instance of the class.
      * @throws NotFoundException No entry was found for this identifier.
      */
     private function makeFactory($nid, array $rule) {
@@ -500,6 +502,9 @@ class Container implements ContainerInterface, ContainerConfiguration {
 
             // Wrap the factory in one that makes the calls.
             $factory = function ($args) use ($factory, $calls) {
+                /**
+                 * @psalm-suppress TooManyArguments
+                 */
                 $instance = $factory($args);
 
                 foreach ($calls as $call) {
@@ -565,7 +570,7 @@ class Container implements ContainerInterface, ContainerConfiguration {
                     $this->instances[$nid] = $instance = $class->newInstanceWithoutConstructor();
 
                     $constructorArgs = $this->resolveArgs(
-                        $this->makeDefaultArgs($constructor, (array)$rule['constructorArgs'], $rule),
+                        $this->makeDefaultArgs($constructor, (array)$rule['constructorArgs']),
                         $args
                     );
                     $constructor->invokeArgs($instance, $constructorArgs);
@@ -581,15 +586,18 @@ class Container implements ContainerInterface, ContainerConfiguration {
         // Call subsequent calls on the new object.
         if (isset($class) && !empty($rule['calls'])) {
             foreach ($rule['calls'] as $call) {
-                list($methodName, $args) = $call;
+                [$methodName, $args] = $call;
                 $method = $class->getMethod($methodName);
 
                 $args = $this->resolveArgs(
-                    $this->makeDefaultArgs($method, $args, $rule),
+                    $this->makeDefaultArgs($method, $args),
                     [],
                     $instance
                 );
 
+                /**
+                 * @psalm-suppress UndefinedMethod
+                 */
                 $method->invokeArgs($instance, $args);
             }
         }
@@ -641,8 +649,11 @@ class Container implements ContainerInterface, ContainerConfiguration {
                 // If the class is not found in the autoloader a reflection exception is thrown.
                 // Unless the parameter is optional we will want to rethrow.
                 if (!$param->isOptional()) {
+                    $typeName = self::parameterTypeName($param);
+                    $functionName = self::functionName($function);
+
                     throw new NotFoundException(
-                        "Could not find required constructor param $name in the autoloader.",
+                        "Could not find class for required parameter $typeName for $functionName in the autoloader.",
                         500,
                         $e
                     );
@@ -658,6 +669,10 @@ class Container implements ContainerInterface, ContainerConfiguration {
 
                 if ($ordinalRule instanceof Reference) {
                     $ruleClass = $ordinalRule->getName();
+                    if (is_array($ruleClass)) {
+                        $ruleClass = end($ruleClass);
+                    }
+
                     if (($resolvedRuleClass = $this->findRuleClass($ruleClass)) !== null) {
                         $ruleClass = $resolvedRuleClass;
                     }
@@ -780,8 +795,41 @@ class Container implements ContainerInterface, ContainerConfiguration {
     private function reflectCallback(callable $callback) {
         if (is_array($callback)) {
             return new \ReflectionMethod($callback[0], $callback[1]);
-        } else {
+        } elseif (is_string($callback) || $callback instanceof \Closure) {
             return new \ReflectionFunction($callback);
+        } else {
+            return new \ReflectionMethod($callback, '__invoke');
         }
+    }
+
+
+    /**
+     * Return the name of a function to aid debugging.
+     *
+     * @param \ReflectionFunctionAbstract $function
+     * @return string
+     */
+    protected static function functionName(\ReflectionFunctionAbstract $function): string {
+        $functionName = $function->getName() . '()';
+        if ($function instanceof \ReflectionMethod) {
+            $functionName = $function->getDeclaringClass()->getName() . '::' . $functionName;
+        }
+        return $functionName;
+    }
+
+    /**
+     * Return the type name of a parameter to aid debugging.
+     *
+     * @param \ReflectionParameter $param
+     * @return string
+     */
+    protected static function parameterTypeName(\ReflectionParameter $param): string {
+        $type = $param->getType();
+        if ($type instanceof \ReflectionNamedType) {
+            $name = $type->getName();
+        } else {
+            $name = $param->getName();
+        }
+        return $name;
     }
 }

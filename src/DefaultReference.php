@@ -47,7 +47,7 @@ class DefaultReference implements ReferenceInterface {
     /**
      * {@inheritdoc}
      */
-    public function resolve(Container $container, $_ = null) {
+    public function resolve(Container $container, $instance = null) {
         return $container->get($this->class);
     }
 }
