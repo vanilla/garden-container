@@ -222,7 +222,14 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
     }
 
     /**
-     * @inheritDoc
+     * Set a specific shared instance into the container.
+     *
+     * When you set an instance into the container then it will always be returned by subsequent retrievals, even if a
+     * rule is configured that says that instances should not be shared.
+     *
+     * @param string $name The name of the container entry.
+     * @param mixed $instance This instance.
+     * @return $this
      */
     public function setInstance(string $name, $instance) {
         $this->instances[$this->normalizeID($name)] = $instance;
@@ -299,10 +306,13 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
             if (is_object($callback[0])) {
                 $instance = $callback[0];
             }
-        } else {
+        } elseif (is_string($callback) || ($callback instanceof \Closure)) {
             $function = new \ReflectionFunction($callback);
+        } else {
+            // Assume we are an invokable.
+            $function = new \ReflectionMethod($callback, '__invoke');
+            $callback = [$callback, '__invoke'];
         }
-
         $args = $this->resolveArgs($this->makeDefaultArgs($function, $args), [], $instance);
 
         return call_user_func_array($callback, $args);
@@ -699,7 +709,11 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
                 $value = $ruleArgs[$pos];
                 $pos++;
             } elseif ($reflectedClass
-                && ($reflectedClass->isInstantiable() || isset($this->rules[$reflectedClass->name]) || array_key_exists($reflectedClass->name, $this->instances))
+                && (
+                    $reflectedClass->isInstantiable()
+                    || isset($this->rules[$reflectedClass->name])
+                    || array_key_exists($reflectedClass->name, $this->instances)
+                )
             ) {
                 $value = new DefaultReference($this->normalizeID($reflectedClass->name));
             } elseif ($hasOrdinalRule) {
@@ -741,10 +755,24 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
 
         $pos = 0;
         foreach ($defaultArgs as $name => &$default) {
+            /**
+             * @psalm-suppress ArgumentTypeCoercion
+             * KLUDGE: DefaultReference::getClass() doesn't definitely give back a class-string.
+             * Something to look into during the PHP8 refactor.
+             */
             if (array_key_exists($name, $args)) {
                 // This is a named arg and should be used.
                 $value = $args[$name];
-            } elseif (isset($args[$pos]) && (!($default instanceof DefaultReference) || empty($default->getClass()) || is_a($args[$pos], $default->getClass()))) {
+            } elseif (isset($args[$pos])
+                && (
+                    !($default instanceof DefaultReference)
+                    || empty($default->getClass())
+                    || is_a(
+                        $args[$pos],
+                        $default->getClass()
+                    )
+                )
+            ) {
                 // There is an arg at this position and it's the same type as the default arg or the default arg is typeless.
                 $value = $args[$pos];
                 $pos++;

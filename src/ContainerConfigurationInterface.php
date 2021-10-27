@@ -155,18 +155,6 @@ interface ContainerConfigurationInterface {
     public function setConstructorArgs(array $args);
 
     /**
-     * Set a specific shared instance into the container.
-     *
-     * When you set an instance into the container then it will always be returned by subsequent retrievals, even if a
-     * rule is configured that says that instances should not be shared.
-     *
-     * @param string $name The name of the container entry.
-     * @param mixed $instance This instance.
-     * @return $this
-     */
-    public function setInstance(string $name, $instance);
-
-    /**
      * Add a method call to a rule.
      *
      * @param string $method The name of the method to call.
