@@ -7,7 +7,7 @@ namespace Garden\Container;
  * @copyright 2009-2021 Vanilla Forums Inc.
  * @license MIT
  */
-interface ContainerConfiguration {
+interface ContainerConfigurationInterface {
 
     /**
      * Set the current rule.
@@ -61,7 +61,7 @@ interface ContainerConfiguration {
      * with the current rule. If the current rule is shared then the same shared instance will be returned. You can add
      * multiple aliases by passing additional arguments to this method.
      *
-     * If {@link ContainerConfiguration::addAlias()} is called with an alias that is the same as the current rule then an **E_USER_NOTICE**
+     * If {@link ContainerConfigurationInterface::addAlias()} is called with an alias that is the same as the current rule then an **E_USER_NOTICE**
      * level error is raised and the alias is not added.
      *
      * @param string ...$alias The alias to set.
@@ -72,7 +72,7 @@ interface ContainerConfiguration {
     /**
      * Remove an alias of the current rule.
      *
-     * If {@link ContainerConfiguration::removeAlias()} is called with an alias that references a different rule then an **E_USER_NOTICE**
+     * If {@link ContainerConfigurationInterface::removeAlias()} is called with an alias that references a different rule then an **E_USER_NOTICE**
      * level error is raised, but the alias is still removed.
      *
      * @param string $alias The alias to remove.

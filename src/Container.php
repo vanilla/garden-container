@@ -12,7 +12,7 @@ use Psr\Container\ContainerInterface;
 /**
  * An inversion of control container.
  */
-class Container implements ContainerInterface, ContainerConfiguration {
+class Container implements ContainerInterface, ContainerConfigurationInterface {
     private $currentRule;
     private $currentRuleName;
     private $instances;
