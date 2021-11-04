@@ -22,7 +22,7 @@ class DefaultReference implements ReferenceInterface {
      *
      * @param string $class The name of the reference.
      */
-    public function __construct($class) {
+    public function __construct(string $class) {
         $this->setClass($class);
     }
 
@@ -31,7 +31,7 @@ class DefaultReference implements ReferenceInterface {
      *
      * @return string Returns the name of the reference.
      */
-    public function getClass() {
+    public function getClass(): string {
         return $this->class;
     }
 
@@ -40,7 +40,7 @@ class DefaultReference implements ReferenceInterface {
      *
      * @param string $class The name of the reference.
      */
-    public function setClass($class) {
+    public function setClass(string $class) {
         $this->class = $class;
     }
 
