@@ -654,7 +654,8 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
 
             $reflectedClass = null;
             try {
-                $reflectedClass = $param->getClass();
+                $reflectedClass = $param->getType() && !$param->getType()->isBuiltin()
+                    ? new \ReflectionClass($param->getType()->getName()) : null;
             } catch (\ReflectionException $e) {
                 // If the class is not found in the autoloader a reflection exception is thrown.
                 // Unless the parameter is optional we will want to rethrow.
@@ -729,7 +730,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
                 $value = new RequiredParameter($param);
             }
 
-            $result[$name] = $value;
+            $result[$param->getName()] = $value;
         }
 
         return $result;
