@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Todd Burry <todd@vanillaforums.com>
- * @copyright 2009-2017 Vanilla Forums Inc.
+ * @copyright 2009-2022 Vanilla Forums Inc.
  * @license MIT
  */
 
@@ -654,7 +654,8 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
 
             $reflectedClass = null;
             try {
-                $reflectedClass = $param->getType() && !$param->getType()->isBuiltin()
+                $reflectionType = $param->getType();
+                $reflectedClass = $reflectionType && !$reflectionType instanceof \ReflectionUnionType && !$reflectionType->isBuiltin()
                     ? new \ReflectionClass($param->getType()->getName()) : null;
             } catch (\ReflectionException $e) {
                 // If the class is not found in the autoloader a reflection exception is thrown.
@@ -664,7 +665,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
                     $functionName = self::functionName($function);
 
                     throw new NotFoundException(
-                        "Could not find class for required parameter $typeName for $functionName in the autoloader.",
+                        "Could not find class for required parameter $typeName for " . $functionName . "in the autoloader.",
                         500,
                         $e
                     );
@@ -673,6 +674,11 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
 
             $hasOrdinalRule = isset($ruleArgs[$pos]);
 
+            /*if dependency is autowired and one of the dependency is a required union type parameter which is not configured we should throw an error  */
+            if($reflectionType instanceof \ReflectionUnionType && (!$hasOrdinalRule || empty($ruleArgs[$name])) && !$param->isOptional()) {
+                throw new ContainerException("The required parameter " . $param->name .
+                    " for class " .  self::functionName($function) ." is not defined", 500);
+            }
             $isMatchingOrdinalReference = false;
             $isMatchingOrdinalInstance = false;
             if ($hasOrdinalRule && $reflectedClass) {
