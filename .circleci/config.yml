@@ -12,7 +12,7 @@ aliases:
 jobs:
     php_setup:
         docker:
-            - image: "circleci/php:7.2.9-cli"
+            - image: "cimg/php:7.2-cli"
         steps:
             - checkout:
                   path: ~/workspace/repo
@@ -25,7 +25,7 @@ jobs:
                       - repo
     php_72_tests:
         docker:
-            - image: "circleci/php:7.2.9-cli"
+            - image: "cimg/php:7.2-cli"
         steps: &php_unit_test_steps
             - *attach_workspace
             - run:
@@ -45,11 +45,11 @@ jobs:
                       ./vendor/bin/phpunit -c phpunit.xml.dist
     php_73_tests:
         docker:
-            - image: "circleci/php:7.3.8-cli"
+            - image: "cimg/php:7.3-cli"
         steps: *php_unit_test_steps
     php_74_tests:
         docker:
-            - image: "circleci/php:7.4.22-cli"
+            - image: "cimg/php:7.4-cli"
         steps: *php_unit_test_steps
 workflows:
     version: 2
