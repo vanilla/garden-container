@@ -1,6 +1,4 @@
 version: 2.1
-orbs:
-    core: vanilla/core@2.1.0
 aliases:
     - &attach_workspace
       attach_workspace:
