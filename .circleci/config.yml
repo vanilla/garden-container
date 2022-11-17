@@ -34,8 +34,9 @@ jobs:
                       php --version
                       composer --version
             - run:
-                  name: Xdebug 
+                  name: Enable Xdebug 
                   command: |
+                      sudo pecl install xdebug
                       sudo docker-php-ext-enable xdebug
             - run:
                   name: Static Analysis
