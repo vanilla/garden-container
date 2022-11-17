@@ -12,7 +12,7 @@ aliases:
 jobs:
     php_setup:
         docker:
-            - image: "cimg/php:7.3"
+            - image: "cimg/php:7.4"
         steps:
             - checkout:
                   path: ~/workspace/repo
@@ -23,9 +23,9 @@ jobs:
                   root: ~/workspace
                   paths:
                       - repo
-    php_72_tests:
+    php_74_tests:
         docker:
-            - image: "cimg/php:7.2"
+            - image: "cimg/php:7.4"
         steps: &php_unit_test_steps
             - *attach_workspace
             - run:
@@ -43,25 +43,18 @@ jobs:
                   command: |
                       cd ~/workspace/repo
                       ./vendor/bin/phpunit -c phpunit.xml.dist
-    php_73_tests:
+    php_80_tests:
         docker:
-            - image: "cimg/php:7.3"
-        steps: *php_unit_test_steps
-    php_74_tests:
-        docker:
-            - image: "cimg/php:7.4"
+            - image: "cimg/php:8.0"
         steps: *php_unit_test_steps
 workflows:
     version: 2
     commit:
         jobs:
             - php_setup
-            - php_72_tests:
-                  requires:
-                      - php_setup
-            - php_73_tests:
-                  requires:
-                      - php_setup
             - php_74_tests:
+                  requires:
+                      - php_setup
+            - php_80_tests:
                   requires:
                       - php_setup
