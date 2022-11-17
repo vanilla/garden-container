@@ -16,6 +16,11 @@ jobs:
         steps:
             - checkout:
                   path: ~/workspace/repo
+            - run:
+                  name: Enable Xdebug 
+                  command: |
+                      sudo pecl install xdebug
+                      sudo docker-php-ext-enable xdebug      
             # We explcitly don't cache dependencies.
             # The cache validation & fetching seems to take longer than fetching from source.
             - *run_composer
@@ -33,11 +38,6 @@ jobs:
                   command: |
                       php --version
                       composer --version
-            - run:
-                  name: Enable Xdebug 
-                  command: |
-                      sudo pecl install xdebug
-                      sudo docker-php-ext-enable xdebug
             - run:
                   name: Static Analysis
                   command: |
