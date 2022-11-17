@@ -17,10 +17,9 @@ jobs:
             - checkout:
                   path: ~/workspace/repo
             - run:
-                  name: Enable Xdebug 
+                  name: Enable Xdebug exit
                   command: |
-                      sudo pecl install xdebug
-                      sudo docker-php-ext-enable xdebug      
+                      sudo pecl install xdebug     
             # We explcitly don't cache dependencies.
             # The cache validation & fetching seems to take longer than fetching from source.
             - *run_composer
