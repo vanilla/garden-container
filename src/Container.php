@@ -653,15 +653,15 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
             $name = strtolower($param->name);
             $reflectedClass = null;
             try {
-                $reflectionType = $param->getType();
-                if($reflectionType) {
-                    if(class_exists(ReflectionUnionType::class) && !$reflectionType instanceof \ReflectionUnionType
-                        && !$reflectionType->isBuiltin()){
+                if(class_exists(ReflectionUnionType::class)){
+                    $reflectionType = $param->getType();
+                    if(!$reflectionType instanceof \ReflectionUnionType && !$reflectionType->isBuiltin()){
                         $reflectedClass = new \ReflectionClass($param->getType()->getName());
-                    }else{
-                        $reflectedClass = $param->getClass();
                     }
+                }else{
+                    $reflectedClass =  $param->getClass();
                 }
+
             } catch (\ReflectionException $e) {
                 // If the class is not found in the autoloader a reflection exception is thrown.
                 // Unless the parameter is optional we will want to rethrow.
