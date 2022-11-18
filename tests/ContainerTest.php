@@ -9,9 +9,11 @@ namespace Garden\Container\Tests;
 
 use Garden\Container\Callback;
 use Garden\Container\Container;
+use Garden\Container\ContainerException;
 use Garden\Container\NotFoundException;
 use Garden\Container\Reference;
 use Garden\Container\Tests\Fixtures\Bad;
+use Garden\Container\Tests\Fixtures\ChildClass;
 use Garden\Container\Tests\Fixtures\CircleA;
 use Garden\Container\Tests\Fixtures\CircleB;
 use Garden\Container\Tests\Fixtures\CircleC;
@@ -463,4 +465,91 @@ class ContainerTest extends AbstractContainerTest {
             return;
         }
     }
+
+
+    /**
+     * Test for class with union type arguments with default value
+     */
+
+    public function testBasicUnionTypeWithDefaultArgs()
+    {
+        if(phpversion() < 8){
+            $this->markTestSkipped("Not Applicable for PHP Version less than 8");
+        }
+        $dic = new Container();
+        $uType = $dic->get(self::UNION_BASIC_DEFAULTS);
+
+        //Verify that the instance is created with default values
+
+        $this->assertInstanceOf(self::UNION_BASIC_DEFAULTS, $uType);
+        $this->assertSame(2, $uType->a);
+        $this->assertSame("hello", $uType->b);
+
+        // Veify that the defaults gets overwritten if we apply specific rules
+        $dic2  = new Container();
+        $dic2
+            ->rule(self::UNION_BASIC_DEFAULTS)
+            ->setConstructorArgs([2.375, "garden"])
+            ->setShared(false);
+
+        $uType = $dic2->get(self::UNION_BASIC_DEFAULTS);
+        $this->assertInstanceOf(self::UNION_BASIC_DEFAULTS, $uType);
+        $this->assertSame(2.375, $uType->a);
+        $this->assertSame("garden", $uType->b);
+
+    }
+
+    /**
+     * Test for class with basic union type arguments
+     */
+    public function testBasicUnionType()
+    {
+        if(phpversion() < 8){
+            $this->markTestSkipped("Not Applicable for PHP Version less than 8");
+        }
+        $dic = new Container();
+
+        //When auto wiring and if the union type argument is not explicitly defined then throw error
+
+        $this->expectExceptionCode(500);
+        $this->expectException(ContainerException::class);
+        $uType = $dic->get(self::UNION_BASIC);
+
+        $dic
+            ->rule(self::UNION_BASIC)
+            ->setConstructorArgs([2.375, "garden"]);
+
+        //Verify that the values are applied
+        $uType = $dic->get(self::UNION_BASIC);
+        $this->assertSame(2.375, $uType->a);
+        $this->assertSame("garden", $uType->b);
+    }
+
+    /**
+     * Test for class with complex union type
+     */
+    public function testComplexUnionTypes()
+    {
+        if(phpversion() < 8){
+            $this->markTestSkipped("Not Applicable for PHP Version less than 8");
+        }
+        $dic = new Container();
+
+        //When auto wiring and if the union type argument is not explicitly defined then throw error
+        $this->expectExceptionCode(500);
+        $this->expectException(ContainerException::class);
+        $uType = $dic->get(self::UNION_COMPLEX);
+
+        // add rule for the class and add constructor arguments
+        $a = new Reference(ChildClass::class);
+        $dic
+            ->rule(self::UNION_COMPLEX)
+            ->setConstructorArgs([$a, null]);
+        $uType = $dic->get(self::UNION_COMPLEX);
+
+        $this->assertInstanceOf(self::UNION_COMPLEX, $uType);
+        $this->assertInstanceOf(ChildClass::class, $uType->a);
+        $this->assertNull($uType->b);
+    }
+
 }

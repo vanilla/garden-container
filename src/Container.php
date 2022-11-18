@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Todd Burry <todd@vanillaforums.com>
- * @copyright 2009-2017 Vanilla Forums Inc.
+ * @copyright 2009-2022 Vanilla Forums Inc.
  * @license MIT
  */
 
@@ -651,11 +651,18 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
         $pos = 0;
         foreach ($function->getParameters() as $i => $param) {
             $name = strtolower($param->name);
-
-            $reflectedClass = null;
+            $reflectedClass = $reflectionType = null;
             try {
-                $reflectedClass = $param->getType() && !$param->getType()->isBuiltin()
-                    ? new \ReflectionClass($param->getType()->getName()) : null;
+                if(class_exists(ReflectionUnionType::class) === true){
+                    $reflectionType = $param->getType();
+                    if(!empty($reflectionType) && !$reflectionType instanceof \ReflectionUnionType){
+                        if(method_exists($reflectionType, 'isBuiltin') && !$reflectionType->isBuiltin()  && method_exists($reflectionType, 'getName'))
+                        $reflectedClass = new \ReflectionClass($reflectionType->getName());
+                    }
+                }else{
+                    $reflectedClass =  $param->getClass();
+                }
+
             } catch (\ReflectionException $e) {
                 // If the class is not found in the autoloader a reflection exception is thrown.
                 // Unless the parameter is optional we will want to rethrow.
@@ -664,7 +671,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
                     $functionName = self::functionName($function);
 
                     throw new NotFoundException(
-                        "Could not find class for required parameter $typeName for $functionName in the autoloader.",
+                        "Could not find class for required parameter $typeName for " . $functionName . "in the autoloader.",
                         500,
                         $e
                     );
@@ -673,6 +680,11 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
 
             $hasOrdinalRule = isset($ruleArgs[$pos]);
 
+            /*if dependency is autowired and one of the dependency is a required union type parameter which is not configured we should throw an error  */
+            if(class_exists(ReflectionUnionType::class) && $reflectionType instanceof \ReflectionUnionType && (!$hasOrdinalRule || empty($ruleArgs[$name])) && !$param->isOptional()) {
+                throw new ContainerException("The required parameter " . $param->name .
+                    " for class " .  self::functionName($function) ." is not defined", 500);
+            }
             $isMatchingOrdinalReference = false;
             $isMatchingOrdinalInstance = false;
             if ($hasOrdinalRule && $reflectedClass) {
