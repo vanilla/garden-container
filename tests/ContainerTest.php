@@ -473,6 +473,9 @@ class ContainerTest extends AbstractContainerTest {
 
     public function testBasicUnionTypeWithDefaultArgs()
     {
+        if(phpversion() < 8){
+            $this->markTestSkipped("Not Applicable for PHP Version less than 8");
+        }
         $dic = new Container();
         $uType = $dic->get(self::UNION_BASIC_DEFAULTS);
 
@@ -501,6 +504,9 @@ class ContainerTest extends AbstractContainerTest {
      */
     public function testBasicUnionType()
     {
+        if(phpversion() < 8){
+            $this->markTestSkipped("Not Applicable for PHP Version less than 8");
+        }
         $dic = new Container();
 
         //When auto wiring and if the union type argument is not explicitly defined then throw error
@@ -524,6 +530,9 @@ class ContainerTest extends AbstractContainerTest {
      */
     public function testComplexUnionTypes()
     {
+        if(phpversion() < 8){
+            $this->markTestSkipped("Not Applicable for PHP Version less than 8");
+        }
         $dic = new Container();
 
         //When auto wiring and if the union type argument is not explicitly defined then throw error
