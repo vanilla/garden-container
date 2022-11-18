@@ -21,16 +21,18 @@ class RequiredParameter extends DefaultReference {
      * @param \ReflectionParameter $param The required parameter.
      */
     public function __construct(\ReflectionParameter $param) {
-        $reflectionType = $param->getType();
+
         $classString = "";
         if(class_exists(ReflectionUnionType::class)){
-            if(!$reflectionType instanceof \ReflectionUnionType && !$param->getType()->isBuiltin()){
-                $classString =   $param->getType()->getName();
+            $reflectionType = $param->getType();
+            if(!empty($reflectionType) && !$reflectionType instanceof \ReflectionUnionType
+                && !$reflectionType->isBuiltin() && method_exists($reflectionType, 'getName')){
+                $classString =   $reflectionType->getName();
             }
         }else{
-            $param->getClass()->name;
+            $classString = $param->getClass() ? $param->getClass()->name : '';
         }
-        
+
         parent::__construct($classString);
 
         $this->parameter = $param->name;

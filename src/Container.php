@@ -651,12 +651,13 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
         $pos = 0;
         foreach ($function->getParameters() as $i => $param) {
             $name = strtolower($param->name);
-            $reflectedClass = null;
+            $reflectedClass = $reflectionType = null;
             try {
-                if(class_exists(ReflectionUnionType::class)){
+                if(class_exists(ReflectionUnionType::class) === true){
                     $reflectionType = $param->getType();
-                    if(!$reflectionType instanceof \ReflectionUnionType && !$reflectionType->isBuiltin()){
-                        $reflectedClass = new \ReflectionClass($param->getType()->getName());
+                    if(!empty($reflectionType) && !$reflectionType instanceof \ReflectionUnionType){
+                        if(!$reflectionType->isBuiltin()  && method_exists($reflectionType, 'getName'))
+                        $reflectedClass = new \ReflectionClass($reflectionType->getName());
                     }
                 }else{
                     $reflectedClass =  $param->getClass();
