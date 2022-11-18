@@ -23,7 +23,7 @@ class RequiredParameter extends DefaultReference {
     public function __construct(\ReflectionParameter $param) {
         $reflectionType = $param->getType();
         $classString = "";
-        if($reflectionType && class_exists(\ReflectionUnionType) && !$reflectionType instanceof \ReflectionUnionType
+        if($reflectionType && class_exists(ReflectionUnionType::class) && !$reflectionType instanceof \ReflectionUnionType
             && !$param->getType()->isBuiltin() || !$param->getType()->isBuiltin())
         $classString =   $param->getType()->getName();
         parent::__construct($classString);

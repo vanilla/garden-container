@@ -655,7 +655,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
             try {
                 $reflectionType = $param->getType();
                 if($reflectionType) {
-                    if(class_exists(\ReflectionUnionType) && !$reflectionType instanceof \ReflectionUnionType
+                    if(class_exists(ReflectionUnionType::class) && !$reflectionType instanceof \ReflectionUnionType
                         && !$reflectionType->isBuiltin() || !$reflectionType->isBuiltin()){
                         $reflectedClass =    new \ReflectionClass($param->getType()->getName());
                     }
@@ -678,7 +678,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
             $hasOrdinalRule = isset($ruleArgs[$pos]);
 
             /*if dependency is autowired and one of the dependency is a required union type parameter which is not configured we should throw an error  */
-            if(class_exists(\ReflectionUnionType) && $reflectionType instanceof \ReflectionUnionType && (!$hasOrdinalRule || empty($ruleArgs[$name])) && !$param->isOptional()) {
+            if(class_exists(ReflectionUnionType::class) && $reflectionType instanceof \ReflectionUnionType && (!$hasOrdinalRule || empty($ruleArgs[$name])) && !$param->isOptional()) {
                 throw new ContainerException("The required parameter " . $param->name .
                     " for class " .  self::functionName($function) ." is not defined", 500);
             }
