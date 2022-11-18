@@ -656,7 +656,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
                 if(class_exists(ReflectionUnionType::class) === true){
                     $reflectionType = $param->getType();
                     if(!empty($reflectionType) && !$reflectionType instanceof \ReflectionUnionType){
-                        if( method_exists($reflectionType, 'isBuiltin') && !$reflectionType->isBuiltin()  && method_exists($reflectionType, 'getName'))
+                        if(method_exists($reflectionType, 'isBuiltin') && !$reflectionType->isBuiltin()  && method_exists($reflectionType, 'getName'))
                         $reflectedClass = new \ReflectionClass($reflectionType->getName());
                     }
                 }else{
