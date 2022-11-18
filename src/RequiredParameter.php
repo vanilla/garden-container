@@ -25,8 +25,9 @@ class RequiredParameter extends DefaultReference {
         $classString = "";
         if(class_exists(ReflectionUnionType::class)){
             $reflectionType = $param->getType();
-            if(!empty($reflectionType) && !$reflectionType instanceof \ReflectionUnionType
-                && !$reflectionType->isBuiltin() && method_exists($reflectionType, 'getName')){
+            if(!empty($reflectionType) && !$reflectionType instanceof \ReflectionUnionType &&
+            method_exists($reflectionType, 'isBuiltin') &&  !$reflectionType->isBuiltin()
+            && method_exists($reflectionType, 'getName')){
                 $classString =   $reflectionType->getName();
             }
         }else{
