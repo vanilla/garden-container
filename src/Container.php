@@ -653,7 +653,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
             $name = strtolower($param->name);
             $reflectedClass = $reflectionType = null;
             try {
-                if(class_exists(ReflectionUnionType::class) === true){
+                if(class_exists(\ReflectionUnionType::class) === true){
                     $reflectionType = $param->getType();
                     if(!empty($reflectionType) && !$reflectionType instanceof \ReflectionUnionType){
                         if(method_exists($reflectionType, 'isBuiltin') && !$reflectionType->isBuiltin()  && method_exists($reflectionType, 'getName'))
@@ -774,6 +774,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
              * Something to look into during the PHP8 refactor.
              */
             if (array_key_exists($name, $args)) {
+                $name = strtolower($name);
                 // This is a named arg and should be used.
                 $value = $args[$name];
             } elseif (isset($args[$pos])
