@@ -773,8 +773,8 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
              * KLUDGE: DefaultReference::getClass() doesn't definitely give back a class-string.
              * Something to look into during the PHP8 refactor.
              */
+            $name = strtolower($name);
             if (array_key_exists($name, $args)) {
-                $name = strtolower($name);
                 // This is a named arg and should be used.
                 $value = $args[$name];
             } elseif (isset($args[$pos])
