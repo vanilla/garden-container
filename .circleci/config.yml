@@ -19,7 +19,7 @@ jobs:
             - run:
                   name: Enable Xdebug exit
                   command: |
-                      sudo pecl install xdebug     
+                      sudo pecl install xdebug-3.1.5
             # We explcitly don't cache dependencies.
             # The cache validation & fetching seems to take longer than fetching from source.
             - *run_composer
@@ -41,7 +41,7 @@ jobs:
                   name: Static Analysis
                   command: |
                       cd ~/workspace/repo
-                      ./vendor/bin/psalm --php-version=8.0
+                      ./vendor/bin/psalm
             - run:
                   name: PHPUnit Tests
                   command: |

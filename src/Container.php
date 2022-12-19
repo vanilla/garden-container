@@ -653,7 +653,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
             $name = strtolower($param->name);
             $reflectedClass = $reflectionType = null;
             try {
-                if(class_exists(ReflectionUnionType::class) === true){
+                if(class_exists(\ReflectionUnionType::class) === true){
                     $reflectionType = $param->getType();
                     if(!empty($reflectionType) && !$reflectionType instanceof \ReflectionUnionType){
                         if(method_exists($reflectionType, 'isBuiltin') && !$reflectionType->isBuiltin()  && method_exists($reflectionType, 'getName'))
@@ -773,16 +773,28 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
              * KLUDGE: DefaultReference::getClass() doesn't definitely give back a class-string.
              * Something to look into during the PHP8 refactor.
              */
+            $name = strtolower($name);
+            $class = null;
+            if(isset($args[$pos]) && is_object($default)) {
+                if(method_exists($default, 'getClass')) {
+                    $class = $default->getClass();
+                }elseif(method_exists($default, 'getName')){
+                    $class = $default->getName();
+                }else{
+                    $class = null;
+                }
+
+            }
             if (array_key_exists($name, $args)) {
                 // This is a named arg and should be used.
                 $value = $args[$name];
             } elseif (isset($args[$pos])
                 && (
                     !($default instanceof DefaultReference)
-                    || empty($default->getClass())
+                    || empty($class)
                     || is_a(
                         $args[$pos],
-                        $default->getClass()
+                        $class
                     )
                 )
             ) {
