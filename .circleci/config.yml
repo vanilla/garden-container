@@ -41,7 +41,7 @@ jobs:
                   name: Static Analysis
                   command: |
                       cd ~/workspace/repo
-                      ./vendor/bin/psalm --php-version=8.0
+                      ./vendor/bin/psalm
             - run:
                   name: PHPUnit Tests
                   command: |
