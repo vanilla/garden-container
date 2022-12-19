@@ -783,7 +783,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
                     || empty($default->getClass())
                     || is_a(
                         $args[$pos],
-                        $default->getClass()
+                        $default->getClass(), true
                     )
                 )
             ) {
