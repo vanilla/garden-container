@@ -774,16 +774,26 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
              * Something to look into during the PHP8 refactor.
              */
             $name = strtolower($name);
+            if(PHP_VERSION >8)
+            {
+                $class = null;
+                $reflectionType = $default->getType();
+                if(!empty($reflectionType) && !$reflectionType->isBuiltin()){
+                    $class =new \ReflectionClass($reflectionType->getName());
+                }
+            }else{
+                $class = $default->getClass();
+            }
             if (array_key_exists($name, $args)) {
                 // This is a named arg and should be used.
                 $value = $args[$name];
             } elseif (isset($args[$pos])
                 && (
                     !($default instanceof DefaultReference)
-                    || empty($default->getClass())
+                    || empty($class)
                     || is_a(
                         $args[$pos],
-                        $default->getClass(), true
+                        $class
                     )
                 )
             ) {
