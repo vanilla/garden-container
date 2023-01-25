@@ -8,11 +8,13 @@
 namespace Garden\Container;
 
 use Psr\Container\ContainerInterface;
+use ReflectionUnionType;
 
 /**
  * An inversion of control container.
  */
-class Container implements ContainerInterface, ContainerConfigurationInterface {
+class Container implements ContainerInterface, ContainerConfigurationInterface
+{
     private $currentRule;
     private $currentRuleName;
     private $instances;
@@ -22,18 +24,20 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
     /**
      * Construct a new instance of the {@link Container} class.
      */
-    public function __construct() {
-        $this->rules = ['*' => ['inherit' => true, 'constructorArgs' => null]];
+    public function __construct()
+    {
+        $this->rules = ["*" => ["inherit" => true, "constructorArgs" => null]];
         $this->instances = [];
         $this->factories = [];
 
-        $this->rule('*');
+        $this->rule("*");
     }
 
     /**
      * Deep clone rules.
      */
-    public function __clone() {
+    public function __clone()
+    {
         $this->rules = $this->arrayClone($this->rules);
         $this->rule($this->currentRuleName);
     }
@@ -42,7 +46,8 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
      * Clear all instances
      *
      */
-    public function clearInstances() {
+    public function clearInstances()
+    {
         $this->instances = [];
     }
 
@@ -53,14 +58,16 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
     /**
      * @inheritDoc
      */
-    public function defaultRule() {
-        return $this->rule('*');
+    public function defaultRule(): static
+    {
+        return $this->rule("*");
     }
 
     /**
      * @inheritDoc
      */
-    public function rule($id) {
+    public function rule($id): static
+    {
         $id = $this->normalizeID($id);
 
         if (!isset($this->rules[$id])) {
@@ -75,7 +82,8 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
     /**
      * @inheritDoc
      */
-    public function hasRule(string $id): bool {
+    public function hasRule(string $id): bool
+    {
         $id = $this->normalizeID($id);
         return !empty($this->rules[$id]);
     }
@@ -83,35 +91,46 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
     /**
      * @inheritDoc
      */
-    public function getClass(): string {
-        return empty($this->currentRule['class']) ? '' : $this->currentRule['class'];
+    public function getClass(): string
+    {
+        return empty($this->currentRule["class"])
+            ? ""
+            : $this->currentRule["class"];
     }
 
     /**
      * @inheritDoc
      */
-    public function setClass(string $className) {
-        $this->currentRule['class'] = $className;
+    public function setClass(string $className): static
+    {
+        $this->currentRule["class"] = $className;
         return $this;
     }
 
     /**
      * @inheritDoc
      */
-    public function getAliasOf(): string {
-        return empty($this->currentRule['aliasOf']) ? '' : $this->currentRule['aliasOf'];
+    public function getAliasOf(): string
+    {
+        return empty($this->currentRule["aliasOf"])
+            ? ""
+            : $this->currentRule["aliasOf"];
     }
 
     /**
      * @inheritDoc
      */
-    public function setAliasOf(string $alias) {
+    public function setAliasOf(string $alias): static
+    {
         $alias = $this->normalizeID($alias);
 
         if ($alias === $this->currentRuleName) {
-            trigger_error("You cannot set alias '$alias' to itself.", E_USER_NOTICE);
+            trigger_error(
+                "You cannot set alias '$alias' to itself.",
+                E_USER_NOTICE
+            );
         } else {
-            $this->currentRule['aliasOf'] = $alias;
+            $this->currentRule["aliasOf"] = $alias;
         }
         return $this;
     }
@@ -119,14 +138,18 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
     /**
      * @inheritDoc
      */
-    public function addAlias(string ...$alias) {
+    public function addAlias(string ...$alias): static
+    {
         foreach ($alias as $name) {
             $name = $this->normalizeID($name);
 
             if ($name === $this->currentRuleName) {
-                trigger_error("Tried to set alias '$name' to self.", E_USER_NOTICE);
+                trigger_error(
+                    "Tried to set alias '$name' to self.",
+                    E_USER_NOTICE
+                );
             } else {
-                $this->rules[$name]['aliasOf'] = $this->currentRuleName;
+                $this->rules[$name]["aliasOf"] = $this->currentRuleName;
             }
         }
         return $this;
@@ -135,25 +158,36 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
     /**
      * @inheritDoc
      */
-    public function removeAlias(string $alias) {
+    public function removeAlias(string $alias): static
+    {
         $alias = $this->normalizeID($alias);
 
-        if (!empty($this->rules[$alias]['aliasOf']) && $this->rules[$alias]['aliasOf'] !== $this->currentRuleName) {
-            trigger_error("Alias '$alias' does not point to the current rule.", E_USER_NOTICE);
+        if (
+            !empty($this->rules[$alias]["aliasOf"]) &&
+            $this->rules[$alias]["aliasOf"] !== $this->currentRuleName
+        ) {
+            trigger_error(
+                "Alias '$alias' does not point to the current rule.",
+                E_USER_NOTICE
+            );
         }
 
-        unset($this->rules[$alias]['aliasOf']);
+        unset($this->rules[$alias]["aliasOf"]);
         return $this;
     }
 
     /**
      * @inheritDoc
      */
-    public function getAliases(): array {
+    public function getAliases(): array
+    {
         $result = [];
 
         foreach ($this->rules as $name => $rule) {
-            if (!empty($rule['aliasOf']) && $rule['aliasOf'] === $this->currentRuleName) {
+            if (
+                !empty($rule["aliasOf"]) &&
+                $rule["aliasOf"] === $this->currentRuleName
+            ) {
                 $result[] = $name;
             }
         }
@@ -164,60 +198,70 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
     /**
      * @inheritDoc
      */
-    public function getFactory(): ?callable {
-        return isset($this->currentRule['factory']) ? $this->currentRule['factory'] : null;
+    public function getFactory(): ?callable
+    {
+        return $this->currentRule["factory"] ?? null;
     }
 
     /**
      * @inheritDoc
      */
-    public function setFactory(?callable $factory = null) {
-        $this->currentRule['factory'] = $factory;
+    public function setFactory(?callable $factory = null): static
+    {
+        $this->currentRule["factory"] = $factory;
         return $this;
     }
 
     /**
      * @inheritDoc
      */
-    public function isShared(): bool {
-        return !empty($this->currentRule['shared']);
+    public function isShared(): bool
+    {
+        return !empty($this->currentRule["shared"]);
     }
 
     /**
      * @inheritDoc
      */
-    public function setShared(bool $shared) {
-        $this->currentRule['shared'] = $shared;
+    public function setShared(bool $shared): static
+    {
+        $this->currentRule["shared"] = $shared;
         return $this;
     }
 
     /**
      * @inheritDoc
      */
-    public function getInherit(): bool {
-        return !empty($this->currentRule['inherit']);
+    public function getInherit(): bool
+    {
+        return !empty($this->currentRule["inherit"]);
     }
 
     /**
      * @inheritDoc
      */
-    public function setInherit(bool $inherit) {
-        $this->currentRule['inherit'] = $inherit;
+    public function setInherit(bool $inherit): static
+    {
+        $this->currentRule["inherit"] = $inherit;
         return $this;
     }
 
     /**
      * @inheritDoc
      */
-    public function getConstructorArgs(): array {
-        return empty($this->currentRule['constructorArgs']) ? [] : $this->currentRule['constructorArgs'];
+    public function getConstructorArgs(): array
+    {
+        return empty($this->currentRule["constructorArgs"])
+            ? []
+            : $this->currentRule["constructorArgs"];
     }
 
     /**
      * @inheritDoc
      */
-    public function setConstructorArgs(array $args) {
-        $this->currentRule['constructorArgs'] = $args;
+    public function setConstructorArgs(array $args): static
+    {
+        $this->currentRule["constructorArgs"] = $args;
         return $this;
     }
 
@@ -231,7 +275,8 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
      * @param mixed $instance This instance.
      * @return $this
      */
-    public function setInstance(string $name, $instance) {
+    public function setInstance(string $name, mixed $instance): static
+    {
         $this->instances[$this->normalizeID($name)] = $instance;
         return $this;
     }
@@ -239,8 +284,9 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
     /**
      * @inheritDoc
      */
-    public function addCall(string $method, array $args = []) {
-        $this->currentRule['calls'][] = [$method, $args];
+    public function addCall(string $method, array $args = []): static
+    {
+        $this->currentRule["calls"][] = [$method, $args];
 
         // Something added a rule. If we have any existing factories make sure we clear them.
         if (isset($this->factories[$this->currentRuleName])) {
@@ -261,12 +307,13 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
      * @param class-string<T>|string $id Identifier of the entry to look for.
      * @param array $args Additional arguments to pass to the constructor.
      *
-     * @throws NotFoundException No entry was found for this identifier.
-     * @throws ContainerException Error while retrieving the entry.
-     *
      * @return T|mixed Entry.
+     *@throws ContainerException Error while retrieving the entry.
+     *
+     * @throws NotFoundException No entry was found for this identifier.
      */
-    public function getArgs($id, array $args = []) {
+    public function getArgs(string $id, array $args = [])
+    {
         $id = $this->normalizeID($id);
 
         if (isset($this->instances[$id])) {
@@ -279,9 +326,9 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
             return $this->factories[$id]($args);
         }
 
-        if (!empty($this->rules[$id]['aliasOf'])) {
+        if (!empty($this->rules[$id]["aliasOf"])) {
             // This rule references another rule.
-            return $this->getArgs($this->rules[$id]['aliasOf'], $args);
+            return $this->getArgs($this->rules[$id]["aliasOf"], $args);
         }
 
         // The factory or instance isn't registered so do that now.
@@ -297,7 +344,8 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
      * @return mixed Returns the result of the callback.
      * @throws ContainerException Throws an exception if the callback cannot be understood.
      */
-    public function call(callable $callback, array $args = []) {
+    public function call(callable $callback, array $args = []): mixed
+    {
         $instance = null;
 
         if (is_array($callback)) {
@@ -306,14 +354,18 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
             if (is_object($callback[0])) {
                 $instance = $callback[0];
             }
-        } elseif (is_string($callback) || ($callback instanceof \Closure)) {
+        } elseif (is_string($callback) || $callback instanceof \Closure) {
             $function = new \ReflectionFunction($callback);
         } else {
             // Assume we are an invokable.
-            $function = new \ReflectionMethod($callback, '__invoke');
-            $callback = [$callback, '__invoke'];
+            $function = new \ReflectionMethod($callback, "__invoke");
+            $callback = [$callback, "__invoke"];
         }
-        $args = $this->resolveArgs($this->makeDefaultArgs($function, $args), [], $instance);
+        $args = $this->resolveArgs(
+            $this->makeDefaultArgs($function, $args),
+            [],
+            $instance
+        );
 
         return call_user_func_array($callback, $args);
     }
@@ -325,10 +377,13 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
      *
      * @return boolean`
      */
-    public function has($id) {
+    public function has(string $id): bool
+    {
         $id = $this->normalizeID($id);
 
-        return isset($this->instances[$id]) || !empty($this->rules[$id]) || class_exists($id);
+        return isset($this->instances[$id]) ||
+            !empty($this->rules[$id]) ||
+            class_exists($id);
     }
 
     /**
@@ -338,7 +393,8 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
      *
      * @return bool
      */
-    public function hasInstance($id) {
+    public function hasInstance(string $id): bool
+    {
         $id = $this->normalizeID($id);
 
         return isset($this->instances[$id]);
@@ -355,7 +411,8 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
      *
      * @return T|mixed Entry.
      */
-    public function get($id) {
+    public function get($id): mixed
+    {
         return $this->getArgs($id);
     }
 
@@ -370,15 +427,14 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
      * @return array Returns the cloned array.
      * @see http://stackoverflow.com/a/17729234
      */
-    private function arrayClone(array $array) {
+    private function arrayClone(array $array): array
+    {
         return array_map(function ($element) {
-            return ((is_array($element))
+            return is_array($element)
                 ? $this->arrayClone($element)
-                : ((is_object($element))
+                : (is_object($element)
                     ? clone $element
-                    : $element
-                )
-            );
+                    : $element);
         }, $array);
     }
 
@@ -388,8 +444,9 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
      * @param string $id The ID to normalize.
      * @return string Returns a normalized ID as a string.
      */
-    private function normalizeID($id) {
-        return ltrim($id, '\\');
+    private function normalizeID(string $id): string
+    {
+        return ltrim($id, "\\");
     }
 
     /**
@@ -398,21 +455,30 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
      * @param string $nid A normalized ID.
      * @return array Returns an array representing a rule.
      */
-    private function makeRule($nid) {
+    private function makeRule(string $nid): array
+    {
         $rule = isset($this->rules[$nid]) ? $this->rules[$nid] : [];
 
         if (class_exists($nid)) {
-            for ($class = get_parent_class($nid); !empty($class); $class = get_parent_class($class)) {
+            for (
+                $class = get_parent_class($nid);
+                !empty($class);
+                $class = get_parent_class($class)
+            ) {
                 // Don't add the rule if it doesn't say to inherit.
-                if (!isset($this->rules[$class]) || (isset($this->rules[$class]['inherit']) && !$this->rules[$class]['inherit'])) {
+                if (
+                    !isset($this->rules[$class]) ||
+                    (isset($this->rules[$class]["inherit"]) &&
+                        !$this->rules[$class]["inherit"])
+                ) {
                     continue;
                 }
                 $rule += $this->rules[$class];
             }
 
             // Add the default rule.
-            if (!empty($this->rules['*']['inherit'])) {
-                $rule += $this->rules['*'];
+            if (!empty($this->rules["*"]["inherit"])) {
+                $rule += $this->rules["*"];
             }
 
             // Add interface calls to the rule.
@@ -421,29 +487,39 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
                 if (isset($this->rules[$interface])) {
                     $interfaceRule = $this->rules[$interface];
 
-                    if (isset($interfaceRule['inherit']) && $interfaceRule['inherit'] === false) {
+                    if (
+                        isset($interfaceRule["inherit"]) &&
+                        $interfaceRule["inherit"] === false
+                    ) {
                         continue;
                     }
 
-                    if (!isset($rule['shared']) && isset($interfaceRule['shared'])) {
-                        $rule['shared'] = $interfaceRule['shared'];
+                    if (
+                        !isset($rule["shared"]) &&
+                        isset($interfaceRule["shared"])
+                    ) {
+                        $rule["shared"] = $interfaceRule["shared"];
                     }
 
-                    if (!isset($rule['constructorArgs']) && isset($interfaceRule['constructorArgs'])) {
-                        $rule['constructorArgs'] = $interfaceRule['constructorArgs'];
+                    if (
+                        !isset($rule["constructorArgs"]) &&
+                        isset($interfaceRule["constructorArgs"])
+                    ) {
+                        $rule["constructorArgs"] =
+                            $interfaceRule["constructorArgs"];
                     }
 
-                    if (!empty($interfaceRule['calls'])) {
-                        $rule['calls'] = array_merge(
-                            isset($rule['calls']) ? $rule['calls'] : [],
-                            $interfaceRule['calls']
+                    if (!empty($interfaceRule["calls"])) {
+                        $rule["calls"] = array_merge(
+                            isset($rule["calls"]) ? $rule["calls"] : [],
+                            $interfaceRule["calls"]
                         );
                     }
                 }
             }
-        } elseif (!empty($this->rules['*']['inherit'])) {
+        } elseif (!empty($this->rules["*"]["inherit"])) {
             // Add the default rule.
-            $rule += $this->rules['*'];
+            $rule += $this->rules["*"];
         }
 
         return $rule;
@@ -457,18 +533,25 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
      * @return callable Returns a function that when called will create a new instance of the class.
      * @throws NotFoundException No entry was found for this identifier.
      */
-    private function makeFactory($nid, array $rule) {
-        $className = empty($rule['class']) ? $nid : $rule['class'];
+    private function makeFactory(string $nid, array $rule): callable|\Closure
+    {
+        $className = empty($rule["class"]) ? $nid : $rule["class"];
 
-        if (!empty($rule['factory'])) {
+        if (!empty($rule["factory"])) {
             // The instance is created with a user-supplied factory function.
-            $callback = $rule['factory'];
+            $callback = $rule["factory"];
             $function = $this->reflectCallback($callback);
 
             if ($function->getNumberOfParameters() > 0) {
-                $callbackArgs = $this->makeDefaultArgs($function, (array)$rule['constructorArgs']);
+                $callbackArgs = $this->makeDefaultArgs(
+                    $function,
+                    (array) $rule["constructorArgs"]
+                );
                 $factory = function ($args) use ($callback, $callbackArgs) {
-                    return call_user_func_array($callback, $this->resolveArgs($callbackArgs, $args));
+                    return call_user_func_array(
+                        $callback,
+                        $this->resolveArgs($callbackArgs, $args)
+                    );
                 };
             } else {
                 $factory = $callback;
@@ -481,33 +564,46 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
         } else {
             // The instance is created by newing up a class.
             if (!class_exists($className)) {
-                throw new NotFoundException("Class $className does not exist.", 404);
+                throw new NotFoundException(
+                    "Class $className does not exist.",
+                    404
+                );
             }
             $class = new \ReflectionClass($className);
             $constructor = $class->getConstructor();
 
             if ($constructor && $constructor->getNumberOfParameters() > 0) {
-                $constructorArgs = $this->makeDefaultArgs($constructor, (array)$rule['constructorArgs']);
+                $constructorArgs = $this->makeDefaultArgs(
+                    $constructor,
+                    (array) $rule["constructorArgs"]
+                );
 
                 $factory = function ($args) use ($className, $constructorArgs) {
-                    return new $className(...array_values($this->resolveArgs($constructorArgs, $args)));
+                    return new $className(
+                        ...array_values(
+                            $this->resolveArgs($constructorArgs, $args)
+                        )
+                    );
                 };
             } else {
                 $factory = function () use ($className) {
-                    return new $className;
+                    return new $className();
                 };
             }
         }
 
         // Add calls to the factory.
-        if (isset($class) && !empty($rule['calls'])) {
+        if (isset($class) && !empty($rule["calls"])) {
             $calls = [];
 
             // Generate the calls array.
-            foreach ($rule['calls'] as $call) {
+            foreach ($rule["calls"] as $call) {
                 [$methodName, $args] = $call;
                 $method = $class->getMethod($methodName);
-                $calls[] = [$methodName, $this->makeDefaultArgs($method, $args)];
+                $calls[] = [
+                    $methodName,
+                    $this->makeDefaultArgs($method, $args),
+                ];
             }
 
             // Wrap the factory in one that makes the calls.
@@ -519,11 +615,12 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
 
                 foreach ($calls as $call) {
                     [$methodName, $defaultArgs] = $call;
-                    $finalArgs = $this->resolveArgs($defaultArgs, [], $instance);
-                    call_user_func_array(
-                        [$instance, $methodName],
-                        $finalArgs
+                    $finalArgs = $this->resolveArgs(
+                        $defaultArgs,
+                        [],
+                        $instance
                     );
+                    call_user_func_array([$instance, $methodName], $finalArgs);
                 }
 
                 return $instance;
@@ -541,23 +638,33 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
      * @param string $nid The normalized ID of the container item.
      * @param array $rule The resolved rule for the ID.
      * @param array $args Additional arguments passed during creation.
-     * @return object Returns the the new instance.
+     * @return object|string Returns the the new instance.
      * @throws NotFoundException Throws an exception if the class does not exist.
      */
-    private function createSharedInstance($nid, array $rule, array $args) {
-        if (!empty($rule['factory'])) {
+    private function createSharedInstance(
+        string $nid,
+        array $rule,
+        array $args
+    ): object|string {
+        if (!empty($rule["factory"])) {
             // The instance is created with a user-supplied factory function.
-            $callback = $rule['factory'];
+            $callback = $rule["factory"];
             $function = $this->reflectCallback($callback);
 
             if ($function->getNumberOfParameters() > 0) {
                 $callbackArgs = $this->resolveArgs(
-                    $this->makeDefaultArgs($function, (array)$rule['constructorArgs']),
+                    $this->makeDefaultArgs(
+                        $function,
+                        (array) $rule["constructorArgs"]
+                    ),
                     $args
                 );
 
                 $this->instances[$nid] = null; // prevent cyclic dependency from infinite loop.
-                $this->instances[$nid] = $instance = call_user_func_array($callback, $callbackArgs);
+                $this->instances[$nid] = $instance = call_user_func_array(
+                    $callback,
+                    $callbackArgs
+                );
             } else {
                 $this->instances[$nid] = $instance = $callback();
             }
@@ -567,9 +674,12 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
                 $class = new \ReflectionClass(get_class($instance));
             }
         } else {
-            $className = empty($rule['class']) ? $nid : $rule['class'];
+            $className = empty($rule["class"]) ? $nid : $rule["class"];
             if (!class_exists($className)) {
-                throw new NotFoundException("Class $className does not exist.", 404);
+                throw new NotFoundException(
+                    "Class $className does not exist.",
+                    404
+                );
             }
             $class = new \ReflectionClass($className);
             $constructor = $class->getConstructor();
@@ -577,10 +687,15 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
             if ($constructor && $constructor->getNumberOfParameters() > 0) {
                 try {
                     // Instantiate the object first so that this instance can be used for cyclic dependencies.
-                    $this->instances[$nid] = $instance = $class->newInstanceWithoutConstructor();
+                    $this->instances[
+                        $nid
+                    ] = $instance = $class->newInstanceWithoutConstructor();
 
                     $constructorArgs = $this->resolveArgs(
-                        $this->makeDefaultArgs($constructor, (array)$rule['constructorArgs']),
+                        $this->makeDefaultArgs(
+                            $constructor,
+                            (array) $rule["constructorArgs"]
+                        ),
                         $args
                     );
                     $constructor->invokeArgs($instance, $constructorArgs);
@@ -589,13 +704,13 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
                     throw $ex;
                 }
             } else {
-                $this->instances[$nid] = $instance = new $class->name;
+                $this->instances[$nid] = $instance = new $class->name();
             }
         }
 
         // Call subsequent calls on the new object.
-        if (isset($class) && !empty($rule['calls'])) {
-            foreach ($rule['calls'] as $call) {
+        if (isset($class) && !empty($rule["calls"])) {
+            foreach ($rule["calls"] as $call) {
                 [$methodName, $args] = $call;
                 $method = $class->getMethod($methodName);
 
@@ -615,7 +730,6 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
         return $instance;
     }
 
-
     /**
      * Find the class implemented by an ID.
      *
@@ -624,13 +738,14 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
      * @param string $nid The normalized ID to look up.
      * @return string|null Returns the name of the class associated with the rule or **null** if one could not be found.
      */
-    private function findRuleClass($nid) {
+    private function findRuleClass(string $nid): ?string
+    {
         if (!isset($this->rules[$nid])) {
             return null;
-        } elseif (!empty($this->rules[$nid]['aliasOf'])) {
-            return $this->findRuleClass($this->rules[$nid]['aliasOf']);
-        } elseif (!empty($this->rules[$nid]['class'])) {
-            return $this->rules[$nid]['class'];
+        } elseif (!empty($this->rules[$nid]["aliasOf"])) {
+            return $this->findRuleClass($this->rules[$nid]["aliasOf"]);
+        } elseif (!empty($this->rules[$nid]["class"])) {
+            return $this->rules[$nid]["class"];
         }
 
         return null;
@@ -644,7 +759,10 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
      * @return array Returns an array in the form `name => defaultValue`.
      * @throws NotFoundException If a non-optional class param is reflected and does not exist.
      */
-    private function makeDefaultArgs(\ReflectionFunctionAbstract $function, array $ruleArgs) {
+    private function makeDefaultArgs(
+        \ReflectionFunctionAbstract $function,
+        array $ruleArgs
+    ): array {
         $ruleArgs = array_change_key_case($ruleArgs);
         $result = [];
 
@@ -653,16 +771,25 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
             $name = strtolower($param->name);
             $reflectedClass = $reflectionType = null;
             try {
-                if(class_exists(\ReflectionUnionType::class) === true){
+                if (class_exists(\ReflectionUnionType::class) === true) {
                     $reflectionType = $param->getType();
-                    if(!empty($reflectionType) && !$reflectionType instanceof \ReflectionUnionType){
-                        if(method_exists($reflectionType, 'isBuiltin') && !$reflectionType->isBuiltin()  && method_exists($reflectionType, 'getName'))
-                        $reflectedClass = new \ReflectionClass($reflectionType->getName());
+                    if (
+                        !empty($reflectionType) &&
+                        !$reflectionType instanceof \ReflectionUnionType
+                    ) {
+                        if (
+                            method_exists($reflectionType, "isBuiltin") &&
+                            !$reflectionType->isBuiltin() &&
+                            method_exists($reflectionType, "getName")
+                        ) {
+                            $reflectedClass = new \ReflectionClass(
+                                $reflectionType->getName()
+                            );
+                        }
                     }
-                }else{
-                    $reflectedClass =  $param->getClass();
+                } else {
+                    $reflectedClass = $param->getClass();
                 }
-
             } catch (\ReflectionException $e) {
                 // If the class is not found in the autoloader a reflection exception is thrown.
                 // Unless the parameter is optional we will want to rethrow.
@@ -671,7 +798,9 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
                     $functionName = self::functionName($function);
 
                     throw new NotFoundException(
-                        "Could not find class for required parameter $typeName for " . $functionName . "in the autoloader.",
+                        "Could not find class for required parameter $typeName for " .
+                            $functionName .
+                            "in the autoloader.",
                         500,
                         $e
                     );
@@ -681,9 +810,20 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
             $hasOrdinalRule = isset($ruleArgs[$pos]);
 
             /*if dependency is autowired and one of the dependency is a required union type parameter which is not configured we should throw an error  */
-            if(class_exists(ReflectionUnionType::class) && $reflectionType instanceof \ReflectionUnionType && (!$hasOrdinalRule || empty($ruleArgs[$name])) && !$param->isOptional()) {
-                throw new ContainerException("The required parameter " . $param->name .
-                    " for class " .  self::functionName($function) ." is not defined", 500);
+            if (
+                class_exists(ReflectionUnionType::class) &&
+                $reflectionType instanceof ReflectionUnionType &&
+                (!$hasOrdinalRule || empty($ruleArgs[$name])) &&
+                !$param->isOptional()
+            ) {
+                throw new ContainerException(
+                    "The required parameter " .
+                        $param->name .
+                        " for class " .
+                        self::functionName($function) .
+                        " is not defined",
+                    500
+                );
             }
             $isMatchingOrdinalReference = false;
             $isMatchingOrdinalInstance = false;
@@ -696,7 +836,11 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
                         $ruleClass = end($ruleClass);
                     }
 
-                    if (($resolvedRuleClass = $this->findRuleClass($ruleClass)) !== null) {
+                    if (
+                        ($resolvedRuleClass = $this->findRuleClass(
+                            $ruleClass
+                        )) !== null
+                    ) {
                         $ruleClass = $resolvedRuleClass;
                     }
 
@@ -708,27 +852,31 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
                     );
                 } elseif (is_object($ordinalRule)) {
                     // The argument is an instance that matches the type hint.
-                    $isMatchingOrdinalInstance = is_a($ordinalRule, $reflectedClass->getName());
+                    $isMatchingOrdinalInstance = is_a(
+                        $ordinalRule,
+                        $reflectedClass->getName()
+                    );
                 }
             }
 
             if (array_key_exists($name, $ruleArgs)) {
                 $value = $ruleArgs[$name];
             } elseif (
-                $reflectedClass
-                && $hasOrdinalRule
-                && ($isMatchingOrdinalReference|| $isMatchingOrdinalInstance)
+                $reflectedClass &&
+                $hasOrdinalRule &&
+                ($isMatchingOrdinalReference || $isMatchingOrdinalInstance)
             ) {
                 $value = $ruleArgs[$pos];
                 $pos++;
-            } elseif ($reflectedClass
-                && (
-                    $reflectedClass->isInstantiable()
-                    || isset($this->rules[$reflectedClass->name])
-                    || array_key_exists($reflectedClass->name, $this->instances)
-                )
+            } elseif (
+                $reflectedClass &&
+                ($reflectedClass->isInstantiable() ||
+                    isset($this->rules[$reflectedClass->name]) ||
+                    array_key_exists($reflectedClass->name, $this->instances))
             ) {
-                $value = new DefaultReference($this->normalizeID($reflectedClass->name));
+                $value = new DefaultReference(
+                    $this->normalizeID($reflectedClass->name)
+                );
             } elseif ($hasOrdinalRule) {
                 $value = $ruleArgs[$pos];
                 $pos++;
@@ -753,18 +901,21 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
      *
      * @param array $defaultArgs The default arguments from {@link Container::makeDefaultArgs()}.
      * @param array $args The arguments passed into a creation.
-     * @param mixed $instance An object instance if the arguments are being resolved on an already constructed object.
+     * @param mixed|null $instance An object instance if the arguments are being resolved on an already constructed object.
      * @return array Returns an array suitable to be applied to a function call.
      * @throws MissingArgumentException Throws an exception when a required parameter is missing.
      */
-    private function resolveArgs(array $defaultArgs, array $args, $instance = null) {
+    private function resolveArgs(
+        array $defaultArgs,
+        array $args,
+        mixed $instance = null
+    ): array {
         // First resolve all passed arguments so their types are known.
-        $args = array_map(
-            function ($arg) use ($instance) {
-                return $arg instanceof ReferenceInterface ? $arg->resolve($this, $instance) : $arg;
-            },
-            array_change_key_case($args)
-        );
+        $args = array_map(function ($arg) use ($instance) {
+            return $arg instanceof ReferenceInterface
+                ? $arg->resolve($this, $instance)
+                : $arg;
+        }, array_change_key_case($args));
 
         $pos = 0;
         foreach ($defaultArgs as $name => &$default) {
@@ -775,28 +926,23 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
              */
             $name = strtolower($name);
             $class = null;
-            if(isset($args[$pos]) && is_object($default)) {
-                if(method_exists($default, 'getClass')) {
+            if (isset($args[$pos]) && is_object($default)) {
+                if (method_exists($default, "getClass")) {
                     $class = $default->getClass();
-                }elseif(method_exists($default, 'getName')){
+                } elseif (method_exists($default, "getName")) {
                     $class = $default->getName();
-                }else{
+                } else {
                     $class = null;
                 }
-
             }
             if (array_key_exists($name, $args)) {
                 // This is a named arg and should be used.
                 $value = $args[$name];
-            } elseif (isset($args[$pos])
-                && (
-                    !($default instanceof DefaultReference)
-                    || empty($class)
-                    || is_a(
-                        $args[$pos],
-                        $class
-                    )
-                )
+            } elseif (
+                isset($args[$pos]) &&
+                (!($default instanceof DefaultReference) ||
+                    empty($class) ||
+                    is_a($args[$pos], $class))
             ) {
                 // There is an arg at this position and it's the same type as the default arg or the default arg is typeless.
                 $value = $args[$pos];
@@ -823,13 +969,14 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
      *
      * @param string $nid The normalized ID of the container item.
      * @param array $args Additional arguments to pass to the constructor.
-     * @return object Returns an object instance.
+     * @return object |string Returns an object instance.
      */
-    private function createInstance($nid, array $args) {
+    private function createInstance(string $nid, array $args): object|string
+    {
         $rule = $this->makeRule($nid);
 
         // Cache the instance or its factory for future use.
-        if (empty($rule['shared'])) {
+        if (empty($rule["shared"])) {
             $factory = $this->makeFactory($nid, $rule);
             $instance = $factory($args);
             $this->factories[$nid] = $factory;
@@ -845,16 +992,16 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
      * @param callable $callback The callback to reflect.
      * @return \ReflectionFunctionAbstract Returns the reflection function for the callback.
      */
-    private function reflectCallback(callable $callback) {
+    private function reflectCallback(callable $callback)
+    {
         if (is_array($callback)) {
             return new \ReflectionMethod($callback[0], $callback[1]);
         } elseif (is_string($callback) || $callback instanceof \Closure) {
             return new \ReflectionFunction($callback);
         } else {
-            return new \ReflectionMethod($callback, '__invoke');
+            return new \ReflectionMethod($callback, "__invoke");
         }
     }
-
 
     /**
      * Return the name of a function to aid debugging.
@@ -862,10 +1009,15 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
      * @param \ReflectionFunctionAbstract $function
      * @return string
      */
-    protected static function functionName(\ReflectionFunctionAbstract $function): string {
-        $functionName = $function->getName() . '()';
+    protected static function functionName(
+        \ReflectionFunctionAbstract $function
+    ): string {
+        $functionName = $function->getName() . "()";
         if ($function instanceof \ReflectionMethod) {
-            $functionName = $function->getDeclaringClass()->getName() . '::' . $functionName;
+            $functionName =
+                $function->getDeclaringClass()->getName() .
+                "::" .
+                $functionName;
         }
         return $functionName;
     }
@@ -876,7 +1028,9 @@ class Container implements ContainerInterface, ContainerConfigurationInterface {
      * @param \ReflectionParameter $param
      * @return string
      */
-    protected static function parameterTypeName(\ReflectionParameter $param): string {
+    protected static function parameterTypeName(
+        \ReflectionParameter $param
+    ): string {
         $type = $param->getType();
         if ($type instanceof \ReflectionNamedType) {
             $name = $type->getName();

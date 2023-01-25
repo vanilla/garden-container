@@ -10,24 +10,26 @@ namespace Garden\Container;
 /**
  * A reference to another entry in a {@link Container}.
  */
-class Reference implements ReferenceInterface {
+class Reference implements ReferenceInterface
+{
     /**
      * @var string|array
      */
-    private $name;
+    private string|array $name;
 
     /**
      * @var array
      */
-    private $args;
+    private array $args;
 
     /**
      * Construct a new instance of the {@link Reference} class.
      *
-     * @param string|array $name The name of the reference.
+     * @param array|string $name The name of the reference.
      * @param array $args Constructor arguments for the reference.
      */
-    public function __construct($name, array $args = []) {
+    public function __construct(array|string $name, array $args = [])
+    {
         $this->setName($name);
         $this->setArgs($args);
     }
@@ -37,23 +39,26 @@ class Reference implements ReferenceInterface {
      *
      * @return string|array Returns the name of the reference.
      */
-    public function getName() {
+    public function getName(): array|string
+    {
         return $this->name;
     }
 
     /**
      * Set the name of the reference.
      *
-     * @param string|array $name The name of the reference.
+     * @param array|string $name The name of the reference.
      */
-    public function setName($name) {
+    public function setName(array|string $name)
+    {
         $this->name = $name;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function resolve(Container $container, $instance = null) {
+    public function resolve(Container $container, mixed $instance = null)
+    {
         if (empty($this->name)) {
             return null;
         } elseif (is_string($this->name)) {
@@ -72,7 +77,8 @@ class Reference implements ReferenceInterface {
      *
      * @return array Returns the arguments.
      */
-    public function getArgs() {
+    public function getArgs(): array
+    {
         return $this->args;
     }
 
@@ -82,7 +88,8 @@ class Reference implements ReferenceInterface {
      * @param array $args An array of arguments.
      * @return $this
      */
-    public function setArgs($args) {
+    public function setArgs(array $args): static
+    {
         $this->args = $args;
         return $this;
     }
