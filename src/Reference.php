@@ -15,20 +15,20 @@ class Reference implements ReferenceInterface
     /**
      * @var string|array
      */
-    private string|array $name;
+    private $name;
 
     /**
      * @var array
      */
-    private array $args;
+    private $args;
 
     /**
      * Construct a new instance of the {@link Reference} class.
      *
-     * @param array|string $name The name of the reference.
+     * @param string|array $name The name of the reference.
      * @param array $args Constructor arguments for the reference.
      */
-    public function __construct(array|string $name, array $args = [])
+    public function __construct($name, array $args = [])
     {
         $this->setName($name);
         $this->setArgs($args);
@@ -39,7 +39,7 @@ class Reference implements ReferenceInterface
      *
      * @return string|array Returns the name of the reference.
      */
-    public function getName(): array|string
+    public function getName()
     {
         return $this->name;
     }
@@ -47,9 +47,9 @@ class Reference implements ReferenceInterface
     /**
      * Set the name of the reference.
      *
-     * @param array|string $name The name of the reference.
+     * @param string|array $name The name of the reference.
      */
-    public function setName(array|string $name)
+    public function setName($name)
     {
         $this->name = $name;
     }
@@ -57,7 +57,7 @@ class Reference implements ReferenceInterface
     /**
      * {@inheritdoc}
      */
-    public function resolve(Container $container, mixed $instance = null)
+    public function resolve(Container $container, $instance = null)
     {
         if (empty($this->name)) {
             return null;
@@ -77,7 +77,7 @@ class Reference implements ReferenceInterface
      *
      * @return array Returns the arguments.
      */
-    public function getArgs(): array
+    public function getArgs()
     {
         return $this->args;
     }
@@ -88,7 +88,7 @@ class Reference implements ReferenceInterface
      * @param array $args An array of arguments.
      * @return $this
      */
-    public function setArgs(array $args): static
+    public function setArgs($args)
     {
         $this->args = $args;
         return $this;

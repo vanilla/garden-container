@@ -13,8 +13,8 @@ namespace Garden\Container;
  */
 class RequiredParameter extends DefaultReference
 {
-    private string $parameter;
-    private string $function;
+    private $parameter;
+    private $function;
 
     /**
      * RequiredParameter constructor.
@@ -36,14 +36,16 @@ class RequiredParameter extends DefaultReference
                 $classString = $reflectionType->getName();
             }
         } else {
-            $classString = $param->getClass()->name ?? "";
+            $classString = $param->getClass() ? $param->getClass()->name : "";
         }
 
         parent::__construct($classString);
 
         $this->parameter = $param->name;
         $this->function =
-            ($param->getDeclaringClass()->name . "::" ?? "") .
+            ($param->getDeclaringClass()
+                ? $param->getDeclaringClass()->name . "::"
+                : "") .
             $param->getDeclaringFunction()->name .
             "()";
     }
@@ -53,7 +55,7 @@ class RequiredParameter extends DefaultReference
      *
      * @return string Returns the name.
      */
-    public function getParameter(): string
+    public function getParameter()
     {
         return $this->parameter;
     }
@@ -63,7 +65,7 @@ class RequiredParameter extends DefaultReference
      *
      * @return string Returns the function.
      */
-    public function getFunction(): string
+    public function getFunction()
     {
         return $this->function;
     }
@@ -73,7 +75,7 @@ class RequiredParameter extends DefaultReference
      *
      * @throws MissingArgumentException Always throws an exception.
      */
-    public function resolve(Container $container, mixed $instance = null)
+    public function resolve(Container $container, $instance = null)
     {
         throw new MissingArgumentException(
             $this->getParameter(),

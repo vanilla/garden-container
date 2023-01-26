@@ -7,8 +7,8 @@
 
 namespace Garden\Container;
 
+use phpDocumentor\Reflection\Types\Boolean;
 use Psr\Container\ContainerInterface;
-use ReflectionUnionType;
 
 /**
  * An inversion of control container.
@@ -200,7 +200,9 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
      */
     public function getFactory(): ?callable
     {
-        return $this->currentRule["factory"] ?? null;
+        return isset($this->currentRule["factory"])
+            ? $this->currentRule["factory"]
+            : null;
     }
 
     /**
@@ -275,7 +277,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
      * @param mixed $instance This instance.
      * @return $this
      */
-    public function setInstance(string $name, mixed $instance)
+    public function setInstance(string $name, $instance)
     {
         $this->instances[$this->normalizeID($name)] = $instance;
         return $this;
@@ -307,12 +309,12 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
      * @param class-string<T>|string $id Identifier of the entry to look for.
      * @param array $args Additional arguments to pass to the constructor.
      *
-     * @return T|mixed Entry.
-     *@throws ContainerException Error while retrieving the entry.
-     *
      * @throws NotFoundException No entry was found for this identifier.
+     * @throws ContainerException Error while retrieving the entry.
+     *
+     * @return T|mixed Entry.
      */
-    public function getArgs(string $id, array $args = [])
+    public function getArgs($id, array $args = [])
     {
         $id = $this->normalizeID($id);
 
@@ -393,7 +395,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
      *
      * @return bool
      */
-    public function hasInstance(string $id): bool
+    public function hasInstance($id)
     {
         $id = $this->normalizeID($id);
 
@@ -427,7 +429,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
      * @return array Returns the cloned array.
      * @see http://stackoverflow.com/a/17729234
      */
-    private function arrayClone(array $array): array
+    private function arrayClone(array $array)
     {
         return array_map(function ($element) {
             return is_array($element)
@@ -444,7 +446,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
      * @param string $id The ID to normalize.
      * @return string Returns a normalized ID as a string.
      */
-    private function normalizeID(string $id): string
+    private function normalizeID($id)
     {
         return ltrim($id, "\\");
     }
@@ -455,7 +457,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
      * @param string $nid A normalized ID.
      * @return array Returns an array representing a rule.
      */
-    private function makeRule(string $nid): array
+    private function makeRule($nid)
     {
         $rule = isset($this->rules[$nid]) ? $this->rules[$nid] : [];
 
@@ -533,7 +535,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
      * @return callable Returns a function that when called will create a new instance of the class.
      * @throws NotFoundException No entry was found for this identifier.
      */
-    private function makeFactory(string $nid, array $rule)
+    private function makeFactory($nid, array $rule)
     {
         $className = empty($rule["class"]) ? $nid : $rule["class"];
 
@@ -638,14 +640,11 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
      * @param string $nid The normalized ID of the container item.
      * @param array $rule The resolved rule for the ID.
      * @param array $args Additional arguments passed during creation.
-     * @return object|string Returns the the new instance.
+     * @return object Returns the the new instance.
      * @throws NotFoundException Throws an exception if the class does not exist.
      */
-    private function createSharedInstance(
-        string $nid,
-        array $rule,
-        array $args
-    ): object|string {
+    private function createSharedInstance($nid, array $rule, array $args)
+    {
         if (!empty($rule["factory"])) {
             // The instance is created with a user-supplied factory function.
             $callback = $rule["factory"];
@@ -738,7 +737,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
      * @param string $nid The normalized ID to look up.
      * @return string|null Returns the name of the class associated with the rule or **null** if one could not be found.
      */
-    private function findRuleClass(string $nid): ?string
+    private function findRuleClass($nid)
     {
         if (!isset($this->rules[$nid])) {
             return null;
@@ -762,7 +761,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
     private function makeDefaultArgs(
         \ReflectionFunctionAbstract $function,
         array $ruleArgs
-    ): array {
+    ) {
         $ruleArgs = array_change_key_case($ruleArgs);
         $result = [];
 
@@ -812,7 +811,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
             /*if dependency is autowired and one of the dependency is a required union type parameter which is not configured we should throw an error  */
             if (
                 class_exists(ReflectionUnionType::class) &&
-                $reflectionType instanceof ReflectionUnionType &&
+                $reflectionType instanceof \ReflectionUnionType &&
                 (!$hasOrdinalRule || empty($ruleArgs[$name])) &&
                 !$param->isOptional()
             ) {
@@ -901,15 +900,15 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
      *
      * @param array $defaultArgs The default arguments from {@link Container::makeDefaultArgs()}.
      * @param array $args The arguments passed into a creation.
-     * @param mixed|null $instance An object instance if the arguments are being resolved on an already constructed object.
+     * @param mixed $instance An object instance if the arguments are being resolved on an already constructed object.
      * @return array Returns an array suitable to be applied to a function call.
      * @throws MissingArgumentException Throws an exception when a required parameter is missing.
      */
     private function resolveArgs(
         array $defaultArgs,
         array $args,
-        mixed $instance = null
-    ): array {
+        $instance = null
+    ) {
         // First resolve all passed arguments so their types are known.
         $args = array_map(function ($arg) use ($instance) {
             return $arg instanceof ReferenceInterface
@@ -969,9 +968,9 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
      *
      * @param string $nid The normalized ID of the container item.
      * @param array $args Additional arguments to pass to the constructor.
-     * @return object |string Returns an object instance.
+     * @return object Returns an object instance.
      */
-    private function createInstance(string $nid, array $args): object|string
+    private function createInstance($nid, array $args)
     {
         $rule = $this->makeRule($nid);
 

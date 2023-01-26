@@ -16,7 +16,7 @@ class DefaultReference implements ReferenceInterface
     /**
      * @var string
      */
-    protected string $class;
+    protected $class;
 
     /**
      * Construct a new instance of the {@link Reference} class.
@@ -51,7 +51,7 @@ class DefaultReference implements ReferenceInterface
     /**
      * {@inheritdoc}
      */
-    public function resolve(Container $container, mixed $instance = null)
+    public function resolve(Container $container, $instance = null)
     {
         return $container->get($this->class);
     }
