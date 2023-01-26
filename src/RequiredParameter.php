@@ -36,7 +36,7 @@ class RequiredParameter extends DefaultReference
                 $classString = $reflectionType->getName();
             }
         } else {
-            $classString = $param->getClass() ? $param->getClass()->name : "";
+            $classString = $param->getClass()->name ?? "";
         }
 
         parent::__construct($classString);
