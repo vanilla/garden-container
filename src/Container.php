@@ -533,7 +533,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
      * @return callable Returns a function that when called will create a new instance of the class.
      * @throws NotFoundException No entry was found for this identifier.
      */
-    private function makeFactory(string $nid, array $rule): callable|\Closure
+    private function makeFactory(string $nid, array $rule)
     {
         $className = empty($rule["class"]) ? $nid : $rule["class"];
 
