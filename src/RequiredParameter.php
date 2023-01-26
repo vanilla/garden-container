@@ -43,9 +43,7 @@ class RequiredParameter extends DefaultReference
 
         $this->parameter = $param->name;
         $this->function =
-            ($param->getDeclaringClass()
-                ? $param->getDeclaringClass()->name . "::"
-                : "") .
+            ($param->getDeclaringClass()->name . "::" ?? "") .
             $param->getDeclaringFunction()->name .
             "()";
     }

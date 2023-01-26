@@ -20,14 +20,14 @@ interface ContainerConfigurationInterface
      * @param string $id The ID of the rule.
      * @return $this
      */
-    public function rule(string $id): static;
+    public function rule(string $id);
 
     /**
      * Set the current rule to the default rule.
      *
      * @return $this
      */
-    public function defaultRule(): static;
+    public function defaultRule();
 
     /**
      * Set the name of the class for the current rule.
@@ -35,7 +35,7 @@ interface ContainerConfigurationInterface
      * @param string $className A valid class name.
      * @return $this
      */
-    public function setClass(string $className): static;
+    public function setClass(string $className);
 
     /**
      * Get the rule that the current rule references.
@@ -50,7 +50,7 @@ interface ContainerConfigurationInterface
      * @param string $alias The name of an entry in the container to point to.
      * @return $this
      */
-    public function setAliasOf(string $alias): static;
+    public function setAliasOf(string $alias);
 
     /**
      * Get the class name of the current rule.
@@ -73,7 +73,7 @@ interface ContainerConfigurationInterface
      * @return $this
      * @since 1.4 Added the ability to pass multiple aliases.
      */
-    public function addAlias(string ...$alias): static;
+    public function addAlias(string ...$alias);
     /**
      * Remove an alias of the current rule.
      *
@@ -83,7 +83,7 @@ interface ContainerConfigurationInterface
      * @param string $alias The alias to remove.
      * @return $this
      */
-    public function removeAlias(string $alias): static;
+    public function removeAlias(string $alias);
 
     /**
      * Get all of the aliases of the current rule.
@@ -107,7 +107,7 @@ interface ContainerConfigurationInterface
      * @param callable|null $factory This callback will be called to create the instance for the rule.
      * @return $this
      */
-    public function setFactory(?callable $factory = null): static;
+    public function setFactory(?callable $factory = null);
 
     /**
      * Whether or not the current rule is shared.
@@ -122,7 +122,7 @@ interface ContainerConfigurationInterface
      * @param bool $shared Whether or not the current rule is shared.
      * @return $this
      */
-    public function setShared(bool $shared): static;
+    public function setShared(bool $shared);
 
     /**
      * Whether or not the current rule will inherit to subclasses.
@@ -137,7 +137,7 @@ interface ContainerConfigurationInterface
      * @param bool $inherit Pass **true** to have subclasses inherit this rule or **false** otherwise.
      * @return $this
      */
-    public function setInherit(bool $inherit): static;
+    public function setInherit(bool $inherit);
 
     /**
      * Get the constructor arguments for the current rule.
@@ -152,7 +152,7 @@ interface ContainerConfigurationInterface
      * @param array $args An array of constructor arguments.
      * @return $this
      */
-    public function setConstructorArgs(array $args): static;
+    public function setConstructorArgs(array $args);
 
     /**
      * Add a method call to a rule.
@@ -161,7 +161,7 @@ interface ContainerConfigurationInterface
      * @param array $args The arguments to pass to the method.
      * @return $this
      */
-    public function addCall(string $method, array $args = []): static;
+    public function addCall(string $method, array $args = []);
 
     /**
      * Determines whether a rule has been defined at a given ID.

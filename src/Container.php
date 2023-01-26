@@ -58,7 +58,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
     /**
      * @inheritDoc
      */
-    public function defaultRule(): static
+    public function defaultRule()
     {
         return $this->rule("*");
     }
@@ -66,7 +66,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
     /**
      * @inheritDoc
      */
-    public function rule($id): static
+    public function rule($id)
     {
         $id = $this->normalizeID($id);
 
@@ -101,7 +101,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
     /**
      * @inheritDoc
      */
-    public function setClass(string $className): static
+    public function setClass(string $className)
     {
         $this->currentRule["class"] = $className;
         return $this;
@@ -120,7 +120,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
     /**
      * @inheritDoc
      */
-    public function setAliasOf(string $alias): static
+    public function setAliasOf(string $alias)
     {
         $alias = $this->normalizeID($alias);
 
@@ -138,7 +138,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
     /**
      * @inheritDoc
      */
-    public function addAlias(string ...$alias): static
+    public function addAlias(string ...$alias)
     {
         foreach ($alias as $name) {
             $name = $this->normalizeID($name);
@@ -158,7 +158,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
     /**
      * @inheritDoc
      */
-    public function removeAlias(string $alias): static
+    public function removeAlias(string $alias)
     {
         $alias = $this->normalizeID($alias);
 
@@ -206,7 +206,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
     /**
      * @inheritDoc
      */
-    public function setFactory(?callable $factory = null): static
+    public function setFactory(?callable $factory = null)
     {
         $this->currentRule["factory"] = $factory;
         return $this;
@@ -223,7 +223,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
     /**
      * @inheritDoc
      */
-    public function setShared(bool $shared): static
+    public function setShared(bool $shared)
     {
         $this->currentRule["shared"] = $shared;
         return $this;
@@ -240,7 +240,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
     /**
      * @inheritDoc
      */
-    public function setInherit(bool $inherit): static
+    public function setInherit(bool $inherit)
     {
         $this->currentRule["inherit"] = $inherit;
         return $this;
@@ -259,7 +259,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
     /**
      * @inheritDoc
      */
-    public function setConstructorArgs(array $args): static
+    public function setConstructorArgs(array $args)
     {
         $this->currentRule["constructorArgs"] = $args;
         return $this;
@@ -275,7 +275,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
      * @param mixed $instance This instance.
      * @return $this
      */
-    public function setInstance(string $name, mixed $instance): static
+    public function setInstance(string $name, mixed $instance)
     {
         $this->instances[$this->normalizeID($name)] = $instance;
         return $this;
@@ -284,7 +284,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
     /**
      * @inheritDoc
      */
-    public function addCall(string $method, array $args = []): static
+    public function addCall(string $method, array $args = [])
     {
         $this->currentRule["calls"][] = [$method, $args];
 
