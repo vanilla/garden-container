@@ -344,7 +344,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
      * @return mixed Returns the result of the callback.
      * @throws ContainerException Throws an exception if the callback cannot be understood.
      */
-    public function call(callable $callback, array $args = []): mixed
+    public function call(callable $callback, array $args = [])
     {
         $instance = null;
 
@@ -411,7 +411,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
      *
      * @return T|mixed Entry.
      */
-    public function get($id): mixed
+    public function get($id)
     {
         return $this->getArgs($id);
     }
