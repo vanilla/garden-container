@@ -7,10 +7,13 @@
 
 namespace Garden\Container;
 
+use Prophecy\Call\Call;
+
 /**
  * A reference that uses a callback to resolve.
  */
-class Callback implements ReferenceInterface {
+class Callback implements ReferenceInterface
+{
     /**
      * @var callable $callback
      */
@@ -21,14 +24,16 @@ class Callback implements ReferenceInterface {
      *
      * @param callable $callback The callback of the reference.
      */
-    public function __construct(callable $callback) {
+    public function __construct(callable $callback)
+    {
         $this->callback = $callback;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function resolve(Container $container, $instance = null) {
+    public function resolve(Container $container, mixed $instance = null)
+    {
         return call_user_func($this->callback, $container, $instance);
     }
 
@@ -37,7 +42,8 @@ class Callback implements ReferenceInterface {
      *
      * @return callable Returns the callback.
      */
-    public function getCallback() {
+    public function getCallback(): callable
+    {
         return $this->callback;
     }
 
@@ -47,7 +53,8 @@ class Callback implements ReferenceInterface {
      * @param callable $callback The new callback to set.
      * @return Callback Returns `$this` for fluent calls.
      */
-    public function setCallback($callback) {
+    public function setCallback(callable $callback): Callback
+    {
         $this->callback = $callback;
         return $this;
     }

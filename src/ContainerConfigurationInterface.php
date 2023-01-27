@@ -12,8 +12,8 @@ namespace Garden\Container;
  *
  * No methods for instantiation are provided.
  */
-interface ContainerConfigurationInterface {
-
+interface ContainerConfigurationInterface
+{
     /**
      * Set the current rule.
      *
@@ -171,4 +171,3 @@ interface ContainerConfigurationInterface {
      */
     public function hasRule(string $id): bool;
 }
-

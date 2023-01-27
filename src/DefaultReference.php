@@ -11,7 +11,8 @@ namespace Garden\Container;
 /**
  * Used internally.
  */
-class DefaultReference implements ReferenceInterface {
+class DefaultReference implements ReferenceInterface
+{
     /**
      * @var string
      */
@@ -22,7 +23,8 @@ class DefaultReference implements ReferenceInterface {
      *
      * @param string $class The name of the reference.
      */
-    public function __construct(string $class) {
+    public function __construct(string $class)
+    {
         $this->setClass($class);
     }
 
@@ -31,7 +33,8 @@ class DefaultReference implements ReferenceInterface {
      *
      * @return string Returns the name of the reference.
      */
-    public function getClass(): string {
+    public function getClass(): string
+    {
         return $this->class;
     }
 
@@ -40,14 +43,16 @@ class DefaultReference implements ReferenceInterface {
      *
      * @param string $class The name of the reference.
      */
-    public function setClass(string $class) {
+    public function setClass(string $class)
+    {
         $this->class = $class;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function resolve(Container $container, $instance = null) {
+    public function resolve(Container $container, $instance = null)
+    {
         return $container->get($this->class);
     }
 }
