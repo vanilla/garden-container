@@ -27,9 +27,7 @@ class ReferenceTest extends AbstractContainerTest
     {
         $dic = new Container();
 
-        $dic->rule(Model::class)->setConstructorArgs([
-            "sql" => $this->makeBazSql(),
-        ]);
+        $dic->rule(Model::class)->setConstructorArgs(["sql" => $this->makeBazSql()]);
 
         /* @var Model $model */
         $model = $dic->get(Model::class);

@@ -473,10 +473,7 @@ class ContainerTest extends AbstractContainerTest
     {
         $dic = new Container();
         $dic->setShared(true);
-        $dic->rule(Tuple::class)->setConstructorArgs([
-            "a" => "a",
-            "b" => new Reference(NotFound::class),
-        ]);
+        $dic->rule(Tuple::class)->setConstructorArgs(["a" => "a", "b" => new Reference(NotFound::class)]);
 
         try {
             $tuple = $dic->get(Tuple::class);

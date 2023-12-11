@@ -3,5 +3,5 @@
     "tabWidth": 4,
     "semi": true,
     "trailingComma": "all",
-    "phpVersion": "8.1"
+    "phpVersion": "7.4"
 }
