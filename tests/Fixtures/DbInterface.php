@@ -7,7 +7,6 @@
 
 namespace Garden\Container\Tests\Fixtures;
 
-
-interface DbInterface {
-
+interface DbInterface
+{
 }

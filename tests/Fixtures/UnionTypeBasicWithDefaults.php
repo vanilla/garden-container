@@ -8,7 +8,7 @@
 
 namespace Garden\Container\Tests\Fixtures;
 
-Class UnionTypeBasicWithDefaults
+class UnionTypeBasicWithDefaults
 {
     public int|float $a;
     public string $b;

@@ -22,15 +22,18 @@ use Garden\Container\Tests\Fixtures\Sql;
 use Garden\Container\Tests\Fixtures\Tuple;
 use Foo\NotFound;
 
-class ContainerTest extends AbstractContainerTest {
-    public function testBasicConstruction() {
+class ContainerTest extends AbstractContainerTest
+{
+    public function testBasicConstruction()
+    {
         $dic = new Container();
         $db = $dic->get(self::DB);
 
         $this->assertInstanceOf(self::DB, $db);
     }
 
-    public function testNotSharedConstruction() {
+    public function testNotSharedConstruction()
+    {
         $dic = new Container();
 
         $db1 = $dic->get(self::DB);
@@ -38,7 +41,8 @@ class ContainerTest extends AbstractContainerTest {
         $this->assertNotSame($db1, $db2);
     }
 
-    public function testSharedConstuction() {
+    public function testSharedConstuction()
+    {
         $dic = new Container();
 
         $dic->setShared(true);
@@ -47,27 +51,27 @@ class ContainerTest extends AbstractContainerTest {
         $this->assertSame($db1, $db2);
     }
 
-    public function testConstrucWithPassedArgs() {
+    public function testConstrucWithPassedArgs()
+    {
         $dic = new Container();
 
         /** @var Db $db */
-        $db = $dic->getArgs(self::DB, ['foo']);
-        $this->assertSame('foo', $db->name);
+        $db = $dic->getArgs(self::DB, ["foo"]);
+        $this->assertSame("foo", $db->name);
     }
 
-    public function testConstructDifferentClass() {
+    public function testConstructDifferentClass()
+    {
         $dic = new Container();
 
-        $dic
-            ->rule(self::DB)
-            ->setClass(self::PDODB);
+        $dic->rule(self::DB)->setClass(self::PDODB);
 
         $db = $dic->get(self::DB);
         $this->assertInstanceOf(self::DB, $db);
-
     }
 
-    public function testBaicInjection() {
+    public function testBaicInjection()
+    {
         $dic = new Container();
 
         /* @var Sql $sql */
@@ -75,7 +79,8 @@ class ContainerTest extends AbstractContainerTest {
         $this->assertInstanceOf(self::DB, $sql->db);
     }
 
-    public function testSetInstance() {
+    public function testSetInstance()
+    {
         $dic = new Container();
 
         $db = new Db();
@@ -92,17 +97,18 @@ class ContainerTest extends AbstractContainerTest {
      * @param bool $shared Whether the container should be shared.
      * @dataProvider provideShared
      */
-    public function testCalls($shared) {
+    public function testCalls($shared)
+    {
         $dic = new Container();
 
         $dic->rule(Tuple::class)
             ->setShared($shared)
-            ->setConstructorArgs(['a', 'b'])
-            ->addCall('setA', ['foo']);
+            ->setConstructorArgs(["a", "b"])
+            ->addCall("setA", ["foo"]);
 
         $t = $dic->get(Tuple::class);
-        $this->assertSame('foo', $t->a);
-        $this->assertSame('b', $t->b);
+        $this->assertSame("foo", $t->a);
+        $this->assertSame("b", $t->b);
     }
 
     /**
@@ -111,7 +117,8 @@ class ContainerTest extends AbstractContainerTest {
      * @param bool $shared Whether the container should be shared.
      * @dataProvider provideShared
      */
-    public function testNoConstructor($shared) {
+    public function testNoConstructor($shared)
+    {
         $dic = new Container();
 
         $dic->setShared($shared);
@@ -120,29 +127,28 @@ class ContainerTest extends AbstractContainerTest {
         $this->assertInstanceOf(self::FOO, $o);
     }
 
-    public function testNestedReference() {
+    public function testNestedReference()
+    {
         $parent = new Container();
         $child = new Container();
 
-        $parent->setInstance('config', $child);
-        $child->setInstance('foo', 'bar');
+        $parent->setInstance("config", $child);
+        $child->setInstance("foo", "bar");
 
-        $parent
-            ->rule(self::DB)
-            ->setConstructorArgs([new Reference(['config', 'foo'])]);
+        $parent->rule(self::DB)->setConstructorArgs([new Reference(["config", "foo"])]);
 
         $db = $parent->get(self::DB);
-        $this->assertSame('bar', $db->name);
+        $this->assertSame("bar", $db->name);
     }
 
     /**
      * Test interface call rules.
      */
-    public function testInterfaceCalls() {
+    public function testInterfaceCalls()
+    {
         $dic = new Container();
 
-        $dic->rule(self::FOO_AWARE)
-            ->addCall('setFoo', [123]);
+        $dic->rule(self::FOO_AWARE)->addCall("setFoo", [123]);
 
         $foo = $dic->get(self::FOO);
         $this->assertSame(123, $foo->foo);
@@ -151,13 +157,14 @@ class ContainerTest extends AbstractContainerTest {
     /**
      * Interface calls should stack with rule calls.
      */
-    public function testInterfaceCallMerging() {
+    public function testInterfaceCallMerging()
+    {
         $dic = new Container();
 
         $dic->rule(self::FOO_AWARE)
-            ->addCall('setFoo', [123])
+            ->addCall("setFoo", [123])
             ->defaultRule()
-            ->addCall('setBar', [456]);
+            ->addCall("setBar", [456]);
 
         $foo = $dic->get(self::FOO);
         $this->assertSame(123, $foo->foo);
@@ -167,19 +174,21 @@ class ContainerTest extends AbstractContainerTest {
     /**
      * A named arg should override injections.
      */
-    public function testNamedInjectedArg() {
+    public function testNamedInjectedArg()
+    {
         $dic = new Container();
 
         $db = new Db();
         /* @var Sql $sql */
-        $sql = $dic->getArgs(self::SQL, ['db' => $db]);
+        $sql = $dic->getArgs(self::SQL, ["db" => $db]);
         $this->assertSame($db, $sql->db);
     }
 
     /**
      * A positional arg should override injections.
      */
-    public function testPositionalInjectedArg() {
+    public function testPositionalInjectedArg()
+    {
         $dic = new Container();
 
         $db = new Db();
@@ -194,34 +203,36 @@ class ContainerTest extends AbstractContainerTest {
      * @param bool $shared Set the container to shared or not.
      * @dataProvider provideShared
      */
-    public function testNotFoundException($shared) {
+    public function testNotFoundException($shared)
+    {
         $dic = new Container();
 
         $this->expectException(NotFoundException::class);
-        $dic->setShared($shared)
-            ->get('adsf');
+        $dic->setShared($shared)->get("adsf");
     }
 
     /**
      * Test {@link Container::call()}
      */
-    public function testBasicCall() {
+    public function testBasicCall()
+    {
         $dic = new Container();
 
         /**
          * @var Sql $sql
          */
-        $sql = $dic->getArgs(self::SQL, ['db' => null]);
+        $sql = $dic->getArgs(self::SQL, ["db" => null]);
         $this->assertNull($sql->db);
 
-        $dic->call([$sql, 'setDb']);
+        $dic->call([$sql, "setDb"]);
         $this->assertInstanceOf(self::DB, $sql->db);
     }
 
     /**
      * Test {@link Container::call()} with a closure.
      */
-    public function testCallClosure() {
+    public function testCallClosure()
+    {
         $dic = new Container();
 
         $called = false;
@@ -237,24 +248,25 @@ class ContainerTest extends AbstractContainerTest {
     /**
      * Global functions should be callable with {@link Container::call()}.
      */
-    public function testCallFunction() {
-        require_once __DIR__.'/Fixtures/functions.php';
+    public function testCallFunction()
+    {
+        require_once __DIR__ . "/Fixtures/functions.php";
 
         $dic = new Container();
         $dic->setShared(true);
 
-
-        $dic->call('Garden\Container\Tests\Fixtures\setDbName', ['func']);
+        $dic->call("Garden\Container\Tests\Fixtures\setDbName", ["func"]);
 
         /* @var Db $db */
         $db = $dic->get(self::DB);
-        $this->assertSame('func', $db->name);
+        $this->assertSame("func", $db->name);
     }
 
     /**
      *
      */
-    public function testCallback() {
+    public function testCallback()
+    {
         $dic = new Container();
 
         $i = 1;
@@ -274,25 +286,25 @@ class ContainerTest extends AbstractContainerTest {
     /**
      * An rule alias should point to the same rule.
      */
-    public function testAlias() {
+    public function testAlias()
+    {
         $dic = new Container();
 
-        $dic->rule('foo')
-            ->setAliasOf(self::DB);
+        $dic->rule("foo")->setAliasOf(self::DB);
 
-        $db = $dic->get('foo');
+        $db = $dic->get("foo");
         $this->assertInstanceOf(self::DB, $db);
     }
 
     /**
      * Test multiple aliases.
      */
-    public function testMultipleAliases() {
+    public function testMultipleAliases()
+    {
         $dic = new Container();
 
-        $aliases = ['foo', 'bar', 'baz'];
-        $dic->rule(Db::class)
-            ->addAlias(...$aliases);
+        $aliases = ["foo", "bar", "baz"];
+        $dic->rule(Db::class)->addAlias(...$aliases);
 
         foreach ($aliases as $alias) {
             $o = $dic->get($alias);
@@ -303,23 +315,25 @@ class ContainerTest extends AbstractContainerTest {
     /**
      * An alias to a shared rule should get an instance of the exact same object.
      */
-    public function testSharedAlias() {
+    public function testSharedAlias()
+    {
         $dic = new Container();
 
         $dic->rule(self::DB)
             ->setShared(true)
-            ->addAlias('foo');
+            ->addAlias("foo");
 
         $db1 = $dic->get(self::DB);
-        $db2 = $dic->get('foo');
+        $db2 = $dic->get("foo");
         $this->assertSame($db1, $db2);
     }
 
     /**
      * The container should be case-insensitive to classes that exist.
      */
-    public function testCaseInsensitiveClass() {
-        require_once __DIR__.'/Fixtures/Db.php';
+    public function testCaseInsensitiveClass()
+    {
+        require_once __DIR__ . "/Fixtures/Db.php";
 
         $dic = new Container();
 
@@ -334,12 +348,11 @@ class ContainerTest extends AbstractContainerTest {
     /**
      * An interface should be able to mark rules ahred.
      */
-    public function testSharedInterface() {
+    public function testSharedInterface()
+    {
         $dic = new Container();
 
-
-        $dic->rule(self::DB_INTERFACE)
-            ->setShared(true);
+        $dic->rule(self::DB_INTERFACE)->setShared(true);
 
         $db1 = $dic->get(self::DB);
         $db2 = $dic->get(self::DB);
@@ -353,7 +366,8 @@ class ContainerTest extends AbstractContainerTest {
      * @param bool $shared Whether or not the interface should be shared.
      * @dataProvider provideShared
      */
-    public function testClassInterfaceSharedPrecedence($shared) {
+    public function testClassInterfaceSharedPrecedence($shared)
+    {
         $dic = new Container();
 
         $dic->rule(self::DB)
@@ -375,7 +389,8 @@ class ContainerTest extends AbstractContainerTest {
     /**
      * The container should not have an interface.
      */
-    public function testDoesNotHaveInterface() {
+    public function testDoesNotHaveInterface()
+    {
         $dic = new Container();
 
         $this->assertFalse($dic->has(self::DB_INTERFACE));
@@ -384,26 +399,26 @@ class ContainerTest extends AbstractContainerTest {
     /**
      * Test cloning with rules.
      */
-    public function testCloning() {
+    public function testCloning()
+    {
         $dic = $dic = new Container();
-        $dic->rule(self::DB)
-            ->setShared(true);
+        $dic->rule(self::DB)->setShared(true);
 
         $dic2 = clone $dic;
-        $dic2->rule(self::DB)
-            ->setConstructorArgs(['foo']);
+        $dic2->rule(self::DB)->setConstructorArgs(["foo"]);
 
         $db1 = $dic->get(self::DB);
         $db2 = $dic2->get(self::DB);
 
         $this->assertNotSame($db1, $db2);
-        $this->assertNotSame('foo', $db1->name);
+        $this->assertNotSame("foo", $db1->name);
     }
 
     /**
      * Test dumping container instances.
      */
-    public function testClearing() {
+    public function testClearing()
+    {
         $dic = new Container();
         $dic->get(self::DB);
 
@@ -414,11 +429,12 @@ class ContainerTest extends AbstractContainerTest {
     /**
      * There was a bug when args aren't specified, but it wasn't caught because tests suppressed notices.
      */
-    public function testNullArgsBug() {
+    public function testNullArgsBug()
+    {
         $dic = new Container();
         $sql = new Sql();
 
-        $dic->call([$sql, 'setDb'], []);
+        $dic->call([$sql, "setDb"], []);
         // Assert that no exception were thrown.
         $this->assertTrue(true);
     }
@@ -429,7 +445,8 @@ class ContainerTest extends AbstractContainerTest {
      * @param string $id The ID to get from the container.
      * @dataProvider provideCircularIDs
      */
-    public function testCircularReference($id) {
+    public function testCircularReference($id)
+    {
         $dic = new Container();
         $dic->setShared(true);
 
@@ -443,19 +460,23 @@ class ContainerTest extends AbstractContainerTest {
      *
      * @return array Returns a data provider array.
      */
-    public function provideCircularIDs() {
+    public function provideCircularIDs()
+    {
         return [
-            'a' => [CircleA::class],
-            'b' => [CircleB::class],
-            'c' => [CircleC::class]
+            "a" => [CircleA::class],
+            "b" => [CircleB::class],
+            "c" => [CircleC::class],
         ];
     }
 
-    public function testContainerCorruption() {
+    public function testContainerCorruption()
+    {
         $dic = new Container();
         $dic->setShared(true);
-        $dic->rule(Tuple::class)
-            ->setConstructorArgs(['a' => 'a', 'b' => new Reference(NotFound::class)]);
+        $dic->rule(Tuple::class)->setConstructorArgs([
+            "a" => "a",
+            "b" => new Reference(NotFound::class),
+        ]);
 
         try {
             $tuple = $dic->get(Tuple::class);
@@ -466,14 +487,13 @@ class ContainerTest extends AbstractContainerTest {
         }
     }
 
-
     /**
      * Test for class with union type arguments with default value
      */
 
     public function testBasicUnionTypeWithDefaultArgs()
     {
-        if(phpversion() < 8){
+        if (phpversion() < 8) {
             $this->markTestSkipped("Not Applicable for PHP Version less than 8");
         }
         $dic = new Container();
@@ -486,7 +506,7 @@ class ContainerTest extends AbstractContainerTest {
         $this->assertSame("hello", $uType->b);
 
         // Veify that the defaults gets overwritten if we apply specific rules
-        $dic2  = new Container();
+        $dic2 = new Container();
         $dic2
             ->rule(self::UNION_BASIC_DEFAULTS)
             ->setConstructorArgs([2.375, "garden"])
@@ -496,7 +516,6 @@ class ContainerTest extends AbstractContainerTest {
         $this->assertInstanceOf(self::UNION_BASIC_DEFAULTS, $uType);
         $this->assertSame(2.375, $uType->a);
         $this->assertSame("garden", $uType->b);
-
     }
 
     /**
@@ -504,7 +523,7 @@ class ContainerTest extends AbstractContainerTest {
      */
     public function testBasicUnionType()
     {
-        if(phpversion() < 8){
+        if (phpversion() < 8) {
             $this->markTestSkipped("Not Applicable for PHP Version less than 8");
         }
         $dic = new Container();
@@ -515,9 +534,7 @@ class ContainerTest extends AbstractContainerTest {
         $this->expectException(ContainerException::class);
         $uType = $dic->get(self::UNION_BASIC);
 
-        $dic
-            ->rule(self::UNION_BASIC)
-            ->setConstructorArgs([2.375, "garden"]);
+        $dic->rule(self::UNION_BASIC)->setConstructorArgs([2.375, "garden"]);
 
         //Verify that the values are applied
         $uType = $dic->get(self::UNION_BASIC);
@@ -530,7 +547,7 @@ class ContainerTest extends AbstractContainerTest {
      */
     public function testComplexUnionTypes()
     {
-        if(phpversion() < 8){
+        if (phpversion() < 8) {
             $this->markTestSkipped("Not Applicable for PHP Version less than 8");
         }
         $dic = new Container();
@@ -542,14 +559,11 @@ class ContainerTest extends AbstractContainerTest {
 
         // add rule for the class and add constructor arguments
         $a = new Reference(ChildClass::class);
-        $dic
-            ->rule(self::UNION_COMPLEX)
-            ->setConstructorArgs([$a, null]);
+        $dic->rule(self::UNION_COMPLEX)->setConstructorArgs([$a, null]);
         $uType = $dic->get(self::UNION_COMPLEX);
 
         $this->assertInstanceOf(self::UNION_COMPLEX, $uType);
         $this->assertInstanceOf(ChildClass::class, $uType->a);
         $this->assertNull($uType->b);
     }
-
 }

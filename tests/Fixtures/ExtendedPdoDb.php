@@ -7,7 +7,6 @@
 
 namespace Garden\Container\Tests\Fixtures;
 
-
-class ExtendedPdoDb extends PdoDb {
-
+class ExtendedPdoDb extends PdoDb
+{
 }

@@ -7,17 +7,19 @@
 
 namespace Garden\Container\Tests\Fixtures;
 
-
-class Sql {
+class Sql
+{
     public $db;
     public $name;
 
-    public function __construct(Db $db = null, $name = 'Sql') {
+    public function __construct(Db $db = null, $name = "Sql")
+    {
         $this->db = $db;
         $this->name = $name;
     }
 
-    public function setDb(Db $db) {
+    public function setDb(Db $db)
+    {
         $this->db = $db;
     }
 }

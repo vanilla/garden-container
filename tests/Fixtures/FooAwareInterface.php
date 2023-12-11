@@ -7,7 +7,7 @@
 
 namespace Garden\Container\Tests\Fixtures;
 
-
-interface FooAwareInterface {
+interface FooAwareInterface
+{
     function setFoo($foo);
 }

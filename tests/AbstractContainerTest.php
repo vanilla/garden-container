@@ -19,7 +19,8 @@ use Garden\Container\Tests\Fixtures\UnionTypeBasicWithoutDefault;
 use Garden\Container\Tests\Fixtures\UnionTypeComplex;
 use PHPUnit\Framework\TestCase;
 
-abstract class AbstractContainerTest extends TestCase {
+abstract class AbstractContainerTest extends TestCase
+{
     const DB = Db::class;
     const DB_INTERFACE = DbInterface::class;
     const DB_DECORATOR = DbDecorator::class;
@@ -36,10 +37,11 @@ abstract class AbstractContainerTest extends TestCase {
      *
      * @return array Returns a data provider array.
      */
-    public function provideShared() {
+    public function provideShared()
+    {
         return [
-            'notShared' => [false],
-            'shared' => [true],
+            "notShared" => [false],
+            "shared" => [true],
         ];
     }
 }

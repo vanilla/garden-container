@@ -7,16 +7,17 @@
 
 namespace Garden\Container\Tests\Fixtures;
 
-
-class DbDecorator implements DbInterface {
+class DbDecorator implements DbInterface
+{
     /**
      * @var DbInterface
      */
     public $db;
 
-    public function __construct(DbInterface $db = null) {
+    public function __construct(DbInterface $db = null)
+    {
         if ($db === null) {
-            $this->db = new Db('default');
+            $this->db = new Db("default");
         } else {
             $this->db = $db;
         }

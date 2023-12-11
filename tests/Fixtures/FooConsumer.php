@@ -7,11 +7,12 @@
 
 namespace Garden\Container\Tests\Fixtures;
 
-
-class FooConsumer {
+class FooConsumer
+{
     public $foo;
 
-    public function __construct(FooAwareInterface $foo) {
+    public function __construct(FooAwareInterface $foo)
+    {
         $this->foo = $foo;
     }
 }

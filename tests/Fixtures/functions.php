@@ -13,6 +13,7 @@ namespace Garden\Container\Tests\Fixtures;
  * @param Db $db The db to set.
  * @param string $name The new name.
  */
-function setDbName(Db $db, $name) {
+function setDbName(Db $db, $name)
+{
     $db->name = $name;
 }

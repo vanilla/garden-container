@@ -7,21 +7,24 @@
 
 namespace Garden\Container\Tests\Fixtures;
 
-
-class Tuple {
+class Tuple
+{
     public $a;
     public $b;
 
-    public function __construct($a = null, $b = null) {
+    public function __construct($a = null, $b = null)
+    {
         $this->a = $a;
         $this->b = $b;
     }
 
-    public function setA($value) {
+    public function setA($value)
+    {
         $this->a = $value;
     }
 
-    public function setB($value) {
+    public function setB($value)
+    {
         $this->b = $value;
     }
 }

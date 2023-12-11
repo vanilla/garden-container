@@ -12,6 +12,6 @@ use Psr\Container\ContainerExceptionInterface;
 /**
  * Represents the base exception for all {@link Container} exceptions.
  */
-class ContainerException extends \Exception implements ContainerExceptionInterface {
-
+class ContainerException extends \Exception implements ContainerExceptionInterface
+{
 }
