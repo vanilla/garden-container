@@ -10,7 +10,8 @@ namespace Garden\Container;
 /**
  * An exception that is thrown when a function/method is called with a missing parameter.
  */
-class MissingArgumentException extends ContainerException {
+class MissingArgumentException extends ContainerException
+{
     private $arg;
     private $function;
 
@@ -20,7 +21,8 @@ class MissingArgumentException extends ContainerException {
      * @param string $arg The name of the missing parameter.
      * @param string $function The name of the function being called, but can be empty when not known.
      */
-    public function __construct($arg, $function = '') {
+    public function __construct($arg, $function = "")
+    {
         $this->arg = $arg;
         $this->function = $function;
 

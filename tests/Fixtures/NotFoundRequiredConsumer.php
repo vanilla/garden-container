@@ -7,12 +7,13 @@
 
 namespace Garden\Container\Tests\Fixtures;
 
-
-class NotFoundRequiredConsumer {
+class NotFoundRequiredConsumer
+{
     public $foo;
     public $configValue;
 
-    public function __construct(SomeNonExistantInterface $foo, $configValue) {
+    public function __construct(SomeNonExistantInterface $foo, $configValue)
+    {
         $this->foo = $foo;
         $this->configValue = $configValue;
     }

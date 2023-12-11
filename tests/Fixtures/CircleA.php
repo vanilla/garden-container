@@ -7,11 +7,12 @@
 
 namespace Garden\Container\Tests\Fixtures;
 
-
-class CircleA {
+class CircleA
+{
     public $ref;
 
-    public function __construct(CircleB $b) {
+    public function __construct(CircleB $b)
+    {
         $this->ref = $b;
     }
 }

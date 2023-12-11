@@ -43,9 +43,7 @@ class RequiredParameter extends DefaultReference
 
         $this->parameter = $param->name;
         $this->function =
-            ($param->getDeclaringClass()
-                ? $param->getDeclaringClass()->name . "::"
-                : "") .
+            ($param->getDeclaringClass() ? $param->getDeclaringClass()->name . "::" : "") .
             $param->getDeclaringFunction()->name .
             "()";
     }
@@ -77,9 +75,6 @@ class RequiredParameter extends DefaultReference
      */
     public function resolve(Container $container, $instance = null)
     {
-        throw new MissingArgumentException(
-            $this->getParameter(),
-            $this->getFunction()
-        );
+        throw new MissingArgumentException($this->getParameter(), $this->getFunction());
     }
 }

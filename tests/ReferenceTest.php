@@ -18,20 +18,20 @@ use Garden\Container\Tests\Fixtures\Sql;
 /**
  * Tests involving reference instantiation.
  */
-class ReferenceTest extends AbstractContainerTest {
-
+class ReferenceTest extends AbstractContainerTest
+{
     /**
      * References can take arguments.
      */
-    public function testReferenceArgs() {
+    public function testReferenceArgs()
+    {
         $dic = new Container();
 
-        $dic->rule(Model::class)
-            ->setConstructorArgs(['sql' => $this->makeBazSql()]);
+        $dic->rule(Model::class)->setConstructorArgs(["sql" => $this->makeBazSql()]);
 
         /* @var Model $model */
         $model = $dic->get(Model::class);
-        $this->assertSame('baz', $model->sql->name);
+        $this->assertSame("baz", $model->sql->name);
     }
 
     /**
@@ -40,7 +40,8 @@ class ReferenceTest extends AbstractContainerTest {
      * @param bool $shared Shared or factory construction.
      * @dataProvider provideShared
      */
-    public function testOrdinalReferenceArg($shared) {
+    public function testOrdinalReferenceArg($shared)
+    {
         $dic = (new Container())->setShared($shared);
 
         $r = $dic->getArgs(FooConsumer::class, [new Reference(Foo::class)]);
@@ -53,20 +54,21 @@ class ReferenceTest extends AbstractContainerTest {
      * @param bool $shared Shared or factory construction.
      * @dataProvider provideShared
      */
-    public function testOrdinalConstructorReferenceArg($shared) {
+    public function testOrdinalConstructorReferenceArg($shared)
+    {
         $dic = (new Container())->setShared($shared);
 
-        $dic->rule('foo')
+        $dic->rule("foo")
             ->setClass(Db::class)
             ->setShared(true)
             ->setConstructorArgs([__FUNCTION__])
 
             ->rule(Sql::class)
-            ->setConstructorArgs([new Reference('foo')]);
+            ->setConstructorArgs([new Reference("foo")]);
 
         $r = $dic->get(Sql::class);
 
-        $this->assertSame($dic->get('foo'), $r->db);
+        $this->assertSame($dic->get("foo"), $r->db);
     }
 
     /**
@@ -75,15 +77,16 @@ class ReferenceTest extends AbstractContainerTest {
      * @param bool $shared Shared or factory construction.
      * @dataProvider provideShared
      */
-    public function testOrdinalConstructorReferenceArgOverride($shared) {
+    public function testOrdinalConstructorReferenceArgOverride($shared)
+    {
         $dic = (new Container())->setShared($shared);
 
-        $dic->rule('foo')
+        $dic->rule("foo")
             ->setShared(true)
-            ->addCall('setFoo', [__FUNCTION__])
+            ->addCall("setFoo", [__FUNCTION__])
 
             ->rule(FooConsumer::class)
-            ->setConstructorArgs([new Reference('foo')]);
+            ->setConstructorArgs([new Reference("foo")]);
 
         $foo = new Foo();
 
@@ -97,61 +100,62 @@ class ReferenceTest extends AbstractContainerTest {
      * @param bool $shared Shared or factory construction.
      * @dataProvider provideShared
      */
-    public function testReferenceOverride($shared) {
+    public function testReferenceOverride($shared)
+    {
         $dic = (new Container())->setShared($shared);
 
-        $dic->rule(FooConsumer::class)
-            ->setConstructorArgs([new Reference(Foo::class)]);
+        $dic->rule(FooConsumer::class)->setConstructorArgs([new Reference(Foo::class)]);
 
-        $dic->setInstance('baz', new Foo());
+        $dic->setInstance("baz", new Foo());
 
-        $r = $dic->getArgs(FooConsumer::class, [new Reference('baz')]);
-        $this->assertSame($dic->get('baz'), $r->foo);
+        $r = $dic->getArgs(FooConsumer::class, [new Reference("baz")]);
+        $this->assertSame($dic->get("baz"), $r->foo);
     }
 
     /**
      * Make a sql reference with name 'not-baz'.
      */
-    private function makeNotBazSql(): Reference {
-        return new Reference(Sql::class, ['not-baz']);
+    private function makeNotBazSql(): Reference
+    {
+        return new Reference(Sql::class, ["not-baz"]);
     }
 
     /**
      * Make a sql reference with name 'baz'.
      */
-    private function makeBazSql(): Reference {
-        return new Reference(Sql::class, ['baz']);
+    private function makeBazSql(): Reference
+    {
+        return new Reference(Sql::class, ["baz"]);
     }
 
     /**
      * References can be passed as a named argument in an `addCall()` rule.
      */
-    public function testReferencePassAsCallArgument() {
+    public function testReferencePassAsCallArgument()
+    {
         $dic = new Container();
 
         $dic->rule(Model::class)
-            ->setConstructorArgs(['sql' => $this->makeNotBazSql()])
-            ->addCall('setSql', ['sql' => $this->makeBazSql()]);
-        ;
-
+            ->setConstructorArgs(["sql" => $this->makeNotBazSql()])
+            ->addCall("setSql", ["sql" => $this->makeBazSql()]);
         /* @var Model $model */
         $model = $dic->get(Model::class);
-        $this->assertSame('baz', $model->sql->name);
+        $this->assertSame("baz", $model->sql->name);
     }
 
     /**
      * References can be passed to as ordinal argument in an `addCall()` rule.
      */
-    public function testReferencePassAsOrdinalCallArgument() {
+    public function testReferencePassAsOrdinalCallArgument()
+    {
         $dic = new Container();
 
         $dic->rule(Model::class)
-            ->setConstructorArgs(['sql' => $this->makeNotBazSql()])
-            ->addCall('setSql', [$this->makeBazSql()])
-        ;
+            ->setConstructorArgs(["sql" => $this->makeNotBazSql()])
+            ->addCall("setSql", [$this->makeBazSql()]);
 
         /* @var Model $model */
         $model = $dic->get(Model::class);
-        $this->assertSame('baz', $model->sql->name);
+        $this->assertSame("baz", $model->sql->name);
     }
 }

@@ -10,26 +10,30 @@ The Garden Container is a simple, but powerful dependency injection container.
 
 ## Features
 
-- Automatically wire dependencies using parameter type hints. You get a lot of functionality before you've done any configuration.
-- Create shared instances of objects without having to use difficult to test statics.
-- Dependencies can be configured for base classes and interfaces and shared amongst subclasses.
-- Setter injection can be configured for classes in the container.
-- Dependencies can be configured to reference sub-containers. Use the container to inject properties from your config files.
-- You can change the classes that implement dependencies or specify the definitive class for an interface.
-- Objects can be constructed with custom factory functions to handle refactoring or edge-cases.
+-   Automatically wire dependencies using parameter type hints. You get a lot of functionality before you've done any configuration.
+-   Create shared instances of objects without having to use difficult to test statics.
+-   Dependencies can be configured for base classes and interfaces and shared amongst subclasses.
+-   Setter injection can be configured for classes in the container.
+-   Dependencies can be configured to reference sub-containers. Use the container to inject properties from your config files.
+-   You can change the classes that implement dependencies or specify the definitive class for an interface.
+-   Objects can be constructed with custom factory functions to handle refactoring or edge-cases.
 
 ## The Basics of Dependency Injection
 
 Consider the following simple object structure where a controller object depends on a Model object and that Model object depends on a database connection.
 
 ```php
-class Controller {
-    public function __construct(Model $model) {
+class Controller
+{
+    public function __construct(Model $model)
+    {
     }
 }
 
-class Model {
-    public function __construct(PDO $db) {
+class Model
+{
+    public function __construct(PDO $db)
+    {
     }
 }
 ```
@@ -44,7 +48,7 @@ You can see how this can get messy when you have to create a lot objects or deep
 
 ```php
 $dic = new Container();
-$controller = $dic->get('Controller'); // dependencies magically wired up
+$controller = $dic->get("Controller"); // dependencies magically wired up
 ```
 
 The container inspects the objects its constructing for type hints and will then construct those objects by recursing back into the container. This is called **auto-wiring** and allows you to create any number of complex object graphs in a very simple manner. If you want to later add more dependencies then you can just add a parameter to your constructor and it will be resolved automatically.
@@ -67,12 +71,11 @@ The container should be thought of as case-sensitive, however if you try and fet
 
 ## Constructor Args
 
-Auto-wiring works only for type-hinted parameters, but if a class has other parameters you will have to configure them using the `setConstructorArgs()` method.  
+Auto-wiring works only for type-hinted parameters, but if a class has other parameters you will have to configure them using the `setConstructorArgs()` method.
 
 ```php
 $dic = new Container();
-$dic->rule('PDO')
-    ->setConsructorArgs([$dsn, $username, $password]);
+$dic->rule("PDO")->setConsructorArgs([$dsn, $username, $password]);
 ```
 
 Here new PDO instances will be configured with the proper credentials. A great benefit of this is that the container passes along the configuration only when a new object is retrieved from the container.
@@ -82,16 +85,17 @@ Here new PDO instances will be configured with the proper credentials. A great b
 If a class has some type hints and some regular parameters you only specify the non-type-hinted ones with constructor args. The other ones will be auto-wired by the container.
 
 ```php
-class Job {
-    public function __construct(Envornment $env, $name, Logger $log) {
+class Job
+{
+    public function __construct(Envornment $env, $name, Logger $log)
+    {
     }
 }
 
 $dic = new Container();
-$dic->rule('Job')
-    ->setConstructorArgs(['job name']);
-    
-$job = $dic->get('Job');
+$dic->rule("Job")->setConstructorArgs(["job name"]);
+
+$job = $dic->get("Job");
 ```
 
 ### Named Arguments
@@ -99,8 +103,10 @@ $job = $dic->get('Job');
 When passing an arguments array to any of the container's methods that expect arguments you can use the array keys to match to a specific parameter name. This is useful if you want to specify a specific argument later in the parameters list. You can also override a type-hinted parameter by specifying its name.
 
 ```php
-$dic->rule('Job')
-    ->setConstructorArgs(['name' => 'job name', 'log' => $dic->get('SysLogger')]);
+$dic->rule("Job")->setConstructorArgs([
+    "name" => "job name",
+    "log" => $dic->get("SysLogger"),
+]);
 ```
 
 ### Passing Constructor Arguments During Object Creation
@@ -109,7 +115,7 @@ You can pass some or all constructor arguments with `getArgs()`.
 
 ```php
 $dic = new Container();
-$pdo = $dic->getArgs('PDO', [$dsn, $username, $password]);
+$pdo = $dic->getArgs("PDO", [$dsn, $username, $password]);
 ```
 
 ## Shared Objects
@@ -119,12 +125,12 @@ You mark a class as shared which means that the container will return the same i
 ```php
 $dic = new Container();
 
-$dic->rule('PDO')
+$dic->rule("PDO")
     ->setConsructorArgs([$dsn, $username, $password])
     ->setShared(true);
 
-$db1 = $dic->get('PDO');
-$db2 = $dic->get('PDO');
+$db1 = $dic->get("PDO");
+$db2 = $dic->get("PDO");
 // $db1 === $db2
 ```
 
@@ -135,10 +141,10 @@ You can add method calls to a rule. Each call that is added is called in order a
 ```php
 $dic = new Container();
 
-$dic->rule('PDO')
+$dic->rule("PDO")
     ->setConsructorArgs([$dsn, $username, $password])
-    ->addCall('setAttribute', [PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION])
-    ->addCall('setAttribute', [PDO::MYSQL_ATTR_INIT_COMMAND, 'set names utf8'])
+    ->addCall("setAttribute", [PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION])
+    ->addCall("setAttribute", [PDO::MYSQL_ATTR_INIT_COMMAND, "set names utf8"]);
 ```
 
 ## Specifying the Class of a Rule
@@ -148,8 +154,7 @@ You can use the `setClass()` method specify the class that is created when getti
 ```php
 $dic = new Container();
 
-$dic->rule('Psr\Log\LoggerInterface')
-    ->setClass('SysLogger');
+$dic->rule("Psr\Log\LoggerInterface")->setClass("SysLogger");
 ```
 
 ## Rule Inheritance
@@ -167,7 +172,7 @@ class UserModel extends Model {
 
 $dic->rule('Model')
     ->setShared(true);
-    
+
 $um1 = $dic->get('UserModel');
 $um2 = $dic->get('UserModel');
 // $um1 === $um2
@@ -178,8 +183,7 @@ $um2 = $dic->get('UserModel');
 Rules can inherit from interfaces in a limited way. If you define a rule on an interface, any classes that implement it will call its method calls in addition to their own and also use the interface rule's constructor args if it doesn't have any defined itself.
 
 ```php
-$dic->rule('Psr\Log\LogAwareInterface')
-    ->addCall('setLogger');
+$dic->rule("Psr\Log\LogAwareInterface")->addCall("setLogger");
 ```
 
 ### The Default Rule
@@ -187,8 +191,7 @@ $dic->rule('Psr\Log\LogAwareInterface')
 There is a default rule that rules inherit from. You can modify this rule by selecting it with either the `defaultRule()` method or `rule('*')`.
 
 ```php
-$dic->defaultRule()
-    ->setShared(true);
+$dic->defaultRule()->setShared(true);
 // Now all objects are shared by default.
 ```
 
@@ -197,12 +200,15 @@ $dic->defaultRule()
 You can specify arguments that reference back into the container. To do this you specify arguments as `Reference` objects. You construct a reference object with an array where each item is a key into the container or a sub-container.
 
 ```php
-class Config {
-    public function __construct($path) {
+class Config
+{
+    public function __construct($path)
+    {
         $this->data = json_decode(file_get_contents($path), true);
     }
-    
-    public function get($key) {
+
+    public function get($key)
+    {
         return $this->data[$key];
     }
 }
@@ -211,13 +217,13 @@ $dic = new Container();
 
 $dic->rule(Config::class)
     ->setShared(true)
-    ->setConstructorArgs(['../config.json'])
-    
+    ->setConstructorArgs(["../config.json"])
+
     ->rule(PDO::class)
     ->setConstructorArgs([
-        new Reference([Config::class, 'dsn']),
-        new Reference([Config::class, 'user']),
-        new Reference([Config::class, 'password'])
+        new Reference([Config::class, "dsn"]),
+        new Reference([Config::class, "user"]),
+        new Reference([Config::class, "password"]),
     ]);
 
 $pdo = $dic->get(PDO::class);
@@ -263,29 +269,33 @@ The `call()` method is similar to [call_user_func_array](http://php.net/manual/e
 
 You can specify a rule to be an alias of another rule. Calling get() on the alias is the same as calling get() on the rule it aliases. The following methods are used to define aliases.
 
-* **getAliasOf(), setAliasOf()**. These methods will make the current rule alias another rule. Not that rules that are aliases will ignore other settings because they are fetched from the destination rule.
+-   **getAliasOf(), setAliasOf()**. These methods will make the current rule alias another rule. Not that rules that are aliases will ignore other settings because they are fetched from the destination rule.
 
-* **addAlias(), removeAlias(), getAliases()**. These methods will add an alias to the current rule. These methods are often more convenient because you usually want to configure a rule and set aliases at the same time.
+-   **addAlias(), removeAlias(), getAliases()**. These methods will add an alias to the current rule. These methods are often more convenient because you usually want to configure a rule and set aliases at the same time.
 
 ### Why Use Aliases?
 
 Aliases are useful when you have dependencies inconsistently type-hinted between base classes, classes, or interfaces and you want them all to resolve to the same shared instance.
 
 ```php
-class Task {
-    public function __construct(LoggerInterface $log) {
+class Task
+{
+    public function __construct(LoggerInterface $log)
+    {
     }
 }
 
-class Item {
-    public function __construct(AbstractLogger $log) {
+class Item
+{
+    public function __construct(AbstractLogger $log)
+    {
     }
 }
 
 $dic = new Container();
 
 $dic->rule(LoggerInterface::class)
-    ->setClass('SysLogger')
+    ->setClass("SysLogger")
     ->setShared(true)
     ->addAlias(AbstractLogger::class);
 

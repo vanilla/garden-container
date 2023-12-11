@@ -15,14 +15,16 @@ use Garden\Container\Tests\Fixtures\PdoDb;
 /**
  * A class to test specific issues that are discovered in the wild.
  */
-class IssuesTest extends AbstractContainerTest {
-    public function testCallOnInterfacedSubclass() {
+class IssuesTest extends AbstractContainerTest
+{
+    public function testCallOnInterfacedSubclass()
+    {
         $dic = new Container();
         $dic->setShared(true);
 
         $dic->rule(DbInterface::class)
             ->setClass(PdoDb::class)
-            ->addCall('inc');
+            ->addCall("inc");
 
         /* @var PdoDb $db */
         $db = $dic->get(DbInterface::class);
@@ -30,19 +32,20 @@ class IssuesTest extends AbstractContainerTest {
         $this->assertSame(1, $db->i);
     }
 
-    public function testCallWithCircularReference() {
+    public function testCallWithCircularReference()
+    {
         $dic = new Container();
         $dic->setShared(true);
 
         $dic->rule(Db::class)
             ->setClass(PdoDb::class)
-            ->addCall('inc')
-            ->addCall('nameDb', ['foo']);
+            ->addCall("inc")
+            ->addCall("nameDb", ["foo"]);
 
         /* @var Db $db */
         $db = $dic->get(Db::class);
 
         $this->assertSame(1, $db->i);
-        $this->assertSame('foo', $db->name);
+        $this->assertSame("foo", $db->name);
     }
 }

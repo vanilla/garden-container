@@ -7,7 +7,6 @@
 
 namespace Garden\Container\Tests;
 
-
 use Garden\Container\Container;
 use Garden\Container\NotFoundException;
 use Garden\Container\Reference;
@@ -19,88 +18,88 @@ use Garden\Container\Tests\Fixtures\NotFoundOptionalConsumer;
 use Garden\Container\Tests\Fixtures\NotFoundRequiredConsumer;
 use Psr\Container\ContainerExceptionInterface;
 
-class ConstructorArgsTest extends AbstractContainerTest {
+class ConstructorArgsTest extends AbstractContainerTest
+{
     /**
      * Named constructor args should work.
      */
-    public function testNamedConstuctorArgs() {
+    public function testNamedConstuctorArgs()
+    {
         $c = new Container();
 
-        $c->setConstructorArgs(['name' => 'foo']);
+        $c->setConstructorArgs(["name" => "foo"]);
 
         /** @var Db $db */
         $db = $c->get(self::DB);
-        $this->assertSame('foo', $db->name);
+        $this->assertSame("foo", $db->name);
     }
 
     /**
      * A subclass should use constructor args from a base class.
      */
-    public function testInheritedClass() {
+    public function testInheritedClass()
+    {
         $c = new Container();
 
-        $c
-            ->rule(self::DB)
-            ->setConstructorArgs(['foo']);
+        $c->rule(self::DB)->setConstructorArgs(["foo"]);
 
         /** @var Db $db */
         $db = $c->get(self::PDODB);
-        $this->assertSame('foo', $db->name);
+        $this->assertSame("foo", $db->name);
     }
 
     /**
      * A subclass should not use constructor args from a non-inherited base class.
      */
-    public function testNonInheritedClass() {
+    public function testNonInheritedClass()
+    {
         $c = new Container();
 
-        $c
-            ->rule(self::DB)
+        $c->rule(self::DB)
             ->setInherit(false)
-            ->setConstructorArgs(['foo']);
+            ->setConstructorArgs(["foo"]);
 
         /** @var Db $db */
         $db = $c->get(self::PDODB);
-        $this->assertNotSame('foo', $db->name);
+        $this->assertNotSame("foo", $db->name);
     }
 
     /**
      * Make sure inherit rules are checked through implmenting interfaces.
      */
-    public function testDeepInheritRulesThroughInterface() {
+    public function testDeepInheritRulesThroughInterface()
+    {
         $c = new Container();
 
-        $c
-            ->rule(self::DB)
+        $c->rule(self::DB)
             ->setInherit(true)
-            ->setConstructorArgs(['db'])
+            ->setConstructorArgs(["db"])
             ->rule(self::PDODB)
             ->setInherit(false)
-            ->setConstructorArgs(['pdodb']);
+            ->setConstructorArgs(["pdodb"]);
 
         /** @var Db $db */
         $db = $c->get(ExtendedPdoDb::class);
-        $this->assertSame('db', $db->name);
+        $this->assertSame("db", $db->name);
     }
-
 
     /**
      * Make sure inherit rules are checked through inherited classes.
      */
-    public function testDeepInheritRulesThroughClass() {
+    public function testDeepInheritRulesThroughClass()
+    {
         $c = new Container();
 
-        $c
-            ->rule(self::DB_INTERFACE)
+        $c->rule(self::DB_INTERFACE)
             ->setInherit(true)
-            ->setConstructorArgs(['interface'])
+            ->setConstructorArgs(["interface"])
             ->rule(self::DB)
             ->setInherit(false)
-            ->setConstructorArgs(['db']);
+            ->setConstructorArgs(["db"]);
 
         /** @var Db $db */
         $db = $c->get(self::PDODB);
-        $this->assertSame('interface', $db->name);
+        $this->assertSame("interface", $db->name);
     }
 
     /**
@@ -109,7 +108,8 @@ class ConstructorArgsTest extends AbstractContainerTest {
      * @param bool $shared Whether or not the container is shared.
      * @dataProvider provideShared
      */
-    public function testConstructorArgsOverridingInjection($shared) {
+    public function testConstructorArgsOverridingInjection($shared)
+    {
         $dic = new Container();
 
         $db = new Db();
@@ -129,73 +129,76 @@ class ConstructorArgsTest extends AbstractContainerTest {
      * @param bool $shared Whether or not the container is shared.
      * @dataProvider provideShared
      */
-    public function testInterfaceConstructorArgs($shared) {
+    public function testInterfaceConstructorArgs($shared)
+    {
         $dic = new Container();
-
 
         $dic->rule(self::DB_INTERFACE)
             ->setShared($shared)
-            ->setConstructorArgs(['interface']);
+            ->setConstructorArgs(["interface"]);
 
         /* @var Db $db */
         $db = $dic->get(self::PDODB);
-        $this->assertSame('interface', $db->name);
+        $this->assertSame("interface", $db->name);
     }
 
     /**
      * Class constructor args should have a higher priority than interface constructor args.
      *
      */
-    public function testInterfaceConstructorArgsPriority() {
+    public function testInterfaceConstructorArgsPriority()
+    {
         $dic = new Container();
 
-
         $dic->rule(self::DB_INTERFACE)
-            ->setConstructorArgs(['interface'])
+            ->setConstructorArgs(["interface"])
 
             ->rule(self::DB)
-            ->setConstructorArgs(['class']);
+            ->setConstructorArgs(["class"]);
 
         /* @var Db $db */
         $db = $dic->get(self::PDODB);
-        $this->assertSame('class', $db->name);
+        $this->assertSame("class", $db->name);
     }
 
     /**
      * An interface that isn't marked to inherit should not inherit its constructor args.
      */
-    public function testNonInheritedConstructorArgs() {
+    public function testNonInheritedConstructorArgs()
+    {
         $dic = new Container();
 
         $dic->rule(self::DB_INTERFACE)
             ->setInherit(false)
-            ->setConstructorArgs(['interface']);
+            ->setConstructorArgs(["interface"]);
 
         /* @var Db $db */
         $db = $dic->get(self::PDODB);
-        $this->assertSame('localhost', $db->name);
+        $this->assertSame("localhost", $db->name);
     }
 
     /**
      * A constructor with an interface hint should not fail if there is no rule for the interface.
      */
-    public function testRulelessInterfaceHint() {
+    public function testRulelessInterfaceHint()
+    {
         $dic = new Container();
 
         /* @var \Garden\Container\Tests\Fixtures\DbDecorator $db */
         $db = $dic->get(self::DB_DECORATOR);
 
         $this->assertInstanceOf(self::DB_DECORATOR, $db);
-        $this->assertSame('default', $db->db->name);
+        $this->assertSame("default", $db->db->name);
     }
 
     /**
      * A constructor with an interface hint should work when there is an instance for the interface.
      */
-    public function testRulelessInterfaceHintWithInstance() {
+    public function testRulelessInterfaceHintWithInstance()
+    {
         $dic = new Container();
 
-        $dbInst = new Db('foo');
+        $dbInst = new Db("foo");
         $dic->setInstance(self::DB_INTERFACE, $dbInst);
 
         /* @var \Garden\Container\Tests\Fixtures\DbDecorator $db */
@@ -208,29 +211,31 @@ class ConstructorArgsTest extends AbstractContainerTest {
     /**
      * A constructor with an interface hint should work when there is a rule for the interface.
      */
-    public function testRulelessInterfaceHintWithRule() {
+    public function testRulelessInterfaceHintWithRule()
+    {
         $dic = new Container();
 
         $dic->rule(self::DB_INTERFACE)
             ->setClass(self::DB)
-            ->setConstructorArgs(['rule']);
+            ->setConstructorArgs(["rule"]);
 
         /* @var \Garden\Container\Tests\Fixtures\DbDecorator $db */
         $db = $dic->get(self::DB_DECORATOR);
 
         $this->assertInstanceOf(self::DB_DECORATOR, $db);
-        $this->assertSame('rule', $db->db->name);
+        $this->assertSame("rule", $db->db->name);
     }
 
     /**
      * Shared classes should allow cyclic dependencies.
      */
-    public function testCyclicSharedDependency() {
+    public function testCyclicSharedDependency()
+    {
         $dic = new Container();
 
         $dic->rule(self::DB_DECORATOR)
             ->setShared(true)
-            ->setConstructorArgs(['db' => new Reference(self::DB_DECORATOR)]);
+            ->setConstructorArgs(["db" => new Reference(self::DB_DECORATOR)]);
 
         /* @var \Garden\Container\Tests\Fixtures\DbDecorator $db */
         $db = $dic->get(self::DB_DECORATOR);
@@ -244,7 +249,8 @@ class ConstructorArgsTest extends AbstractContainerTest {
      * @param bool $shared Shared or factory construction.
      * @dataProvider provideShared
      */
-    public function testMissingRequiredParams($shared) {
+    public function testMissingRequiredParams($shared)
+    {
         $this->expectException(ContainerExceptionInterface::class);
         $dic = new Container();
         $dic->setShared($shared);
@@ -258,16 +264,16 @@ class ConstructorArgsTest extends AbstractContainerTest {
      * @param bool $shared Shared or factory construction.
      * @dataProvider provideShared
      */
-    public function testNotFoundRequiredParams($shared) {
+    public function testNotFoundRequiredParams($shared)
+    {
         $dic = new Container();
         $dic->setShared($shared);
 
         $this->expectException(NotFoundException::class);
-        $this->expectExceptionMessage('Could not find class for required parameter');
+        $this->expectExceptionMessage("Could not find class for required parameter");
         /** @var NotFoundOptionalConsumer $m */
         $m = $dic->get(NotFoundRequiredConsumer::class);
     }
-
 
     /**
      * An optional parameter that could not be found (non-existant class) should use the defaults.
@@ -275,7 +281,8 @@ class ConstructorArgsTest extends AbstractContainerTest {
      * @param bool $shared Shared or factory construction.
      * @dataProvider provideShared
      */
-    public function testNotFoundOptionalParams($shared) {
+    public function testNotFoundOptionalParams($shared)
+    {
         $dic = new Container();
         $dic->setShared($shared);
 
@@ -294,7 +301,8 @@ class ConstructorArgsTest extends AbstractContainerTest {
      * @param bool $shared Shared or factory construction.
      * @dataProvider provideShared
      */
-    public function testPassingRequiredParam($shared) {
+    public function testPassingRequiredParam($shared)
+    {
         $dic = new Container();
         $dic->setShared($shared);
         $foo = new Foo();

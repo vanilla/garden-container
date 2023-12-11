@@ -7,15 +7,17 @@
 
 namespace Garden\Container\Tests\Fixtures;
 
-
-class Model {
+class Model
+{
     public $sql;
 
-    public function __construct(Sql $sql) {
+    public function __construct(Sql $sql)
+    {
         $this->sql = $sql;
     }
 
-    public function setSql(Sql $sql) {
+    public function setSql(Sql $sql)
+    {
         $this->sql = $sql;
     }
 }
