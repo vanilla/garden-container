@@ -854,7 +854,7 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
      * @param array $args Additional arguments to pass to the constructor.
      * @return object Returns an object instance.
      */
-    private function createInstance($nid, array $args)
+    protected function createInstance($nid, array $args)
     {
         $rule = $this->makeRule($nid);
 
