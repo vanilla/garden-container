@@ -32,7 +32,7 @@ class Callback implements ReferenceInterface
     /**
      * {@inheritdoc}
      */
-    public function resolve(Container $container, mixed $instance = null)
+    public function resolve(Container $container, $instance = null)
     {
         return call_user_func($this->callback, $container, $instance);
     }

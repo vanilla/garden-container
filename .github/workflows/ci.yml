@@ -30,7 +30,9 @@ jobs:
             - name: Composer Install
               run: composer install -o
             - name: PHPUnit
-              run: ./vendor/bin/phpunit -c ./phpunit.xml.dist
+              run: |
+                  php -v
+                  ./vendor/bin/phpunit -c ./phpunit.xml.dist
             - name: Static Analysis
               run: ./vendor/bin/psalm
     prettier:
