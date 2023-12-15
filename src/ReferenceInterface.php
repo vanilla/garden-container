@@ -19,5 +19,5 @@ interface ReferenceInterface
      * @param mixed|null $instance If the reference is being resolved on an already instantiated object it will be passed here.
      * @return mixed Returns the resolved reference.
      */
-    public function resolve(Container $container, mixed $instance = null);
+    public function resolve(Container $container, $instance = null);
 }
