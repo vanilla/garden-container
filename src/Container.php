@@ -262,6 +262,8 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
 
     /**
      * @inheritDoc
+     *
+     * @throws ContainerException
      */
     public function addCall(string $method, array $args = [])
     {
@@ -270,6 +272,12 @@ class Container implements ContainerInterface, ContainerConfigurationInterface
         // Something added a rule. If we have any existing factories make sure we clear them.
         if (isset($this->factories[$this->currentRuleName])) {
             unset($this->factories[$this->currentRuleName]);
+        }
+
+        // If we have any existing instances make sure we add the call onto the instance.
+        if ($this->hasInstance($this->currentRuleName)) {
+            $obj = $this->get($this->currentRuleName);
+            $this->call([$obj, $method], $args);
         }
 
         return $this;

@@ -18,6 +18,8 @@ use Garden\Container\Tests\Fixtures\CircleA;
 use Garden\Container\Tests\Fixtures\CircleB;
 use Garden\Container\Tests\Fixtures\CircleC;
 use Garden\Container\Tests\Fixtures\Db;
+use Garden\Container\Tests\Fixtures\Foo;
+use Garden\Container\Tests\Fixtures\FooAwareInterface;
 use Garden\Container\Tests\Fixtures\Sql;
 use Garden\Container\Tests\Fixtures\Tuple;
 use Foo\NotFound;
@@ -169,6 +171,21 @@ class ContainerTest extends AbstractContainerTest
         $foo = $dic->get(self::FOO);
         $this->assertSame(123, $foo->foo);
         $this->assertSame(456, $foo->bar);
+    }
+
+    /**
+     * Test that adding a call to an existing instance works.
+     *
+     * @return void
+     */
+    public function testAddCallToExistingInstance(): void
+    {
+        $dic = new Container();
+        $dic->rule(Foo::class)->setShared(true);
+
+        $foo = $dic->get(Foo::class);
+        $dic->rule(Foo::class)->addCall("setFoo", [123]);
+        $this->assertEquals(123, $foo->foo);
     }
 
     /**
